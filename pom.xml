@@ -4,9 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.bioimageanalysis.icy</groupId>
+    <parent>
+        <artifactId>pom-icy</artifactId>
+        <groupId>org.bioimageanalysis.icy</groupId>
+        <version>1.0.4</version>
+    </parent>
+
     <artifactId>icy-connected-components</artifactId>
-    <version>4.8.5</version>
+    <version>4.8.6</version>
 
     <packaging>jar</packaging>
 
@@ -23,30 +28,7 @@
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-
-        <outputJar>${project.build.outputDirectory}/../plugin</outputJar>
     </properties>
-
-    <build>
-        <finalName>${project.artifactId}</finalName>
-
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.2</version>
-                <configuration>
-                    <outputDirectory>${outputJar}</outputDirectory>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>plugins.adufour.connectedcomponents.ConnectedComponents</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
     <dependencies>
         <dependency>
@@ -91,17 +73,4 @@
             <url>https://www.ebi.ac.uk/intact/maven/nexus/content/repositories/ebi-repo/</url>
         </repository>
     </repositories>
-
-    <distributionManagement>
-        <repository>
-            <id>icy-dev</id>
-            <name>icy-dev</name>
-            <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
-        </repository>
-        <snapshotRepository>
-            <id>icy-dev</id>
-            <name>icy-dev</name>
-            <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
