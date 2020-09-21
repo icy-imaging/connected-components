@@ -84,7 +84,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
     }
 
     /**
-     * @param cc
+     * @param cc ConnectedComponent
      * @return a triplet representing the radiuses of the best fitting ellipse (the third value is 0
      *         for 2D objects)
      */
@@ -175,7 +175,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      *        the input component
      * @param bsCenter
      *        the computed center of the bounding sphere
-     * @param maxBounds
+     * @param bsRadius
      *        the computed radius of the bounding sphere
      */
     public void computeBoundingSphere(ConnectedComponent cc, Point3d bsCenter, VarDouble bsRadius)
@@ -185,6 +185,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
     }
 
     /**
+     * @param cc ConnectedComponent
      * @param contourPoints
      *        (set to <code>null</code> if not wanted) an output list of extracted contour
      *        points
@@ -300,7 +301,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
 
     /**
      * Compute the sphericity (circularity in 2D) of the given component, measured as a weighted
-     * ratio between the component's dimensions.<br/>
+     * ratio between the component's dimensions.<br>
      * NOTE: the circularity index is adjusted to work with digitized contours, and partially
      * corrects for digitization artifacts (see the
      * {@link #computePerimeter(ConnectedComponent, ArrayList, Sequence)} method)
@@ -379,7 +380,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
     }
 
     /**
-     * @param cc
+     * @param cc ConnectedComponent
      * @return The hull ratio, measured as the ratio between the object volume and its convex hull
      *         (envelope)
      */
@@ -391,7 +392,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
     }
 
     /**
-     * @param cc
+     * @param cc ConnectedComponent
      * @return An array containing [contour, area] of the smallest convex envelope surrounding the
      *         object. The 2 values are returned together because their computation is simultaneous
      *         (in the 3D case only)

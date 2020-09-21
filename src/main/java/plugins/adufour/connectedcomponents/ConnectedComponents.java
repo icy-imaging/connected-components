@@ -1347,8 +1347,8 @@ public class ConnectedComponents extends EzPlug implements Block
      * 
      * @param output
      *        a sequence of type INT
-     * @param components
-     * @param comparator
+     * @param components Map of List of ConnectedComponent
+     * @param comparator Comparator of ConnectedComponents
      */
     public static void createLabeledSequence(Sequence output, Map<Integer, List<ConnectedComponent>> components,
             Comparator<ConnectedComponent> comparator)

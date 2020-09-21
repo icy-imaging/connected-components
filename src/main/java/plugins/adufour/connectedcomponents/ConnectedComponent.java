@@ -61,7 +61,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
     /**
      * Creates a new connected component with given initial capacity
      * 
-     * @param initialCapacity
+     * @param initialCapacity int
      */
     public ConnectedComponent(int initialCapacity)
     {
@@ -167,7 +167,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
      * Computes the average intensity of the component on each channel of the given sequence, at the
      * time point where this component was found
      * 
-     * @param sequence
+     * @param sequence Sequence
      * @return an array containing the average intensity of the component in each band
      */
     public double[] computeMeanIntensity(Sequence sequence)
@@ -179,7 +179,8 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
      * Computes the average intensity of the component on each channel of the given sequence and the
      * specified time point
      * 
-     * @param sequence
+     * @param sequence Sequence
+     * @param t int
      * @return an array containing the average intensity of the component in each band
      */
     public double[] computeMeanIntensity(Sequence sequence, int t)
@@ -206,7 +207,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
      * Computes the minimum intensity of the component on each channel of the given sequence, at the
      * time point where this component was found
      * 
-     * @param sequence
+     * @param sequence Sequence
      * @return an array containing the average intensity of the component in each band
      */
     public double[] computeMinIntensity(Sequence sequence)
@@ -218,7 +219,8 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
      * Computes the minimum intensity of the component on each channel of the given sequence and the
      * specified time point
      * 
-     * @param sequence
+     * @param sequence Sequence
+     * @param t int
      * @return an array containing the average intensity of the component in each band
      */
     public double[] computeMinIntensity(Sequence sequence, int t)
@@ -247,7 +249,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
      * Computes the maximum intensity of the component on each channel of the given sequence, at the
      * time point where this component was found
      * 
-     * @param sequence
+     * @param sequence Sequence
      * @return an array containing the average intensity of the component in each band
      */
     public double[] computeMaxIntensity(Sequence sequence)
@@ -258,8 +260,9 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
     /**
      * Computes the maximum intensity pixel of the component on each channel of the given sequence
      * and the specified time point
-     * 
-     * @param sequence
+     *
+     * @param sequence Sequence
+     * @param t int
      * @return an array containing the average intensity of the component in each band
      */
     public double[] computeMaxIntensity(Sequence sequence, int t)
@@ -289,7 +292,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
      * 
      * @param component
      *        the component to compute the distance to
-     * @return
+     * @return double
      */
     public double distanceTo(ConnectedComponent component)
     {
@@ -313,7 +316,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
      * Returns an iterator over the internal points array. Useful to browse all points without
      * duplicating the array
      * 
-     * @return
+     * @return Point3i Iterator
      */
     public Iterable<Point3i> getIterablePoints()
     {
@@ -323,10 +326,10 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
     /**
      * Computes the major axis of the object, which is the vector between the two most distant
      * points of this component. Note that the result vector orientation is meaningless if the
-     * component is spherical.<br/>
+     * component is spherical.<br>
      * NOTE: this is an potentially expensive operation: O(N log N)
      * 
-     * @return
+     * @return 3D Vector
      */
     public Vector3d getMajorAxis()
     {
@@ -401,7 +404,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
     /**
      * Computes the mass center of this component
      * 
-     * @return
+     * @return 3D Point
      */
     public Point3d getMassCenter()
     {
@@ -416,8 +419,8 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
     /**
      * Returns the maximum distance between any point of this component and the specified point
      * 
-     * @param point
-     * @return
+     * @param point 3D Point
+     * @return double
      */
     public double getMaxDistanceTo(Point3d point)
     {
@@ -569,7 +572,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
     }
 
     /**
-     * @param component
+     * @param component ConnectedComponent
      * @return true if this component intersects (e.g. has at least one voxel overlapping with) the
      *         specified component
      */
@@ -598,8 +601,8 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
     /**
      * Creates a new component with the intersection between the current and specified components
      * 
-     * @param component
-     * @return
+     * @param component ConnectedComponent
+     * @return ConnectedComponent
      */
     public ConnectedComponent intersection(ConnectedComponent component)
     {
@@ -628,8 +631,10 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
     /**
      * Paints this component onto the given sequence with the specified value
      * 
-     * @param s
-     * @param value
+     * @param s Sequence
+     * @param t int
+     * @param c int
+     * @param value double
      */
     public void paintOnSequence(Sequence s, int t, int c, double value)
     {
@@ -672,7 +677,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
      * Creates a new byte sequence filled with this component. The sequence has a unique time point,
      * and the image size is equal to the bounding box of this component.
      * 
-     * @return
+     * @return Sequence
      */
     public Sequence toSequence()
     {
