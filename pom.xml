@@ -10,7 +10,7 @@
         <version>1.0.4</version>
     </parent>
 
-    <artifactId>icy-connected-components</artifactId>
+    <artifactId>connected-components</artifactId>
     <version>4.8.7</version>
 
     <packaging>jar</packaging>
