@@ -7,7 +7,7 @@
     <parent>
         <artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <version>1.0.4</version>
+        <version>1.0.6</version>
     </parent>
 
     <artifactId>connected-components</artifactId>
@@ -22,29 +22,16 @@
         Output can be pushed to the swimming pool for other plug-ins to further exploit the extracted objects.
     </description>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jdk.version>1.8</jdk.version>
-
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-kernel</artifactId>
-            <version>2.1.0</version>
+            <artifactId>blocks</artifactId>
+            <version>${blocks.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-blocks</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-detection-result</artifactId>
-            <version>1.0.0</version>
+            <artifactId>detection-result</artifactId>
+            <version>${detection-result.version}</version>
         </dependency>
         <dependency>
             <groupId>Jama</groupId>
@@ -53,8 +40,8 @@
         </dependency>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-quickhull</artifactId>
-            <version>1.0.0</version>
+            <artifactId>quickhull</artifactId>
+            <version>${quickhull.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.vecmath</groupId>
@@ -64,10 +51,6 @@
     </dependencies>
 
     <repositories>
-        <repository>
-            <id>icy</id>
-            <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
-        </repository>
         <repository>
             <id>jama</id>
             <url>https://www.ebi.ac.uk/intact/maven/nexus/content/repositories/ebi-repo/</url>
