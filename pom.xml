@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <version>1.0.6</version>
+        <version>1.0.8</version>
     </parent>
 
     <artifactId>connected-components</artifactId>
@@ -26,17 +26,11 @@
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>blocks</artifactId>
-            <version>${blocks.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>detection-result</artifactId>
-            <version>${detection-result.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>Jama</groupId>
-            <artifactId>Jama</artifactId>
-            <version>1.0.2</version>
+            <artifactId>spot-detection-utilities</artifactId>
+            <version>${spot-detection-utilities.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
@@ -44,16 +38,22 @@
             <version>${quickhull.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.vecmath</groupId>
+            <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>vecmath</artifactId>
-            <version>1.5.2</version>
+            <version>${vecmath.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>jama</artifactId>
+            <version>${jama.version}</version>
         </dependency>
     </dependencies>
 
     <repositories>
         <repository>
-            <id>jama</id>
-            <url>https://www.ebi.ac.uk/intact/maven/nexus/content/repositories/ebi-repo/</url>
+            <id>icy</id>
+            <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
         </repository>
     </repositories>
+
 </project>
