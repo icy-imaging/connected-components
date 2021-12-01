@@ -631,12 +631,17 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i>
     /**
      * Paints this component onto the given sequence with the specified value
      * 
-     * @param s Sequence
-     * @param t int
-     * @param c int
-     * @param value double
+     * @param s
+     *        Sequence
+     * @param t
+     *        int
+     * @param c
+     *        int
+     * @param value
+     *        double
+     * @throws InterruptedException
      */
-    public void paintOnSequence(Sequence s, int t, int c, double value)
+    public void paintOnSequence(Sequence s, int t, int c, double value) throws InterruptedException
     {
         DataIteratorUtil.set(new SequenceDataIterator(s, toROI(), true, -1, t, c), value);
     }

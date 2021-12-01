@@ -14,6 +14,7 @@ import javax.vecmath.Point3i;
 import javax.vecmath.Point4d;
 
 import icy.file.FileUtil;
+import icy.gui.frame.progress.FailedAnnounceFrame;
 import icy.image.IcyBufferedImage;
 import icy.image.colormap.FireColorMap;
 import icy.main.Icy;
@@ -268,28 +269,36 @@ public class ConnectedComponents extends EzPlug implements Block
         // never remove objects touching the Z edge in 2D (that would remove... everything!)
         boolean discardEdgesAlongZ = (inputSequence.getSizeZ() > 1 && discardEdgesZ.getValue());
 
-        if (extractionMethod.getValue() == ExtractionType.ROI)
+        try
         {
-            int width = inputSequence.getWidth();
-            int height = inputSequence.getHeight();
+            if (extractionMethod.getValue() == ExtractionType.ROI)
+            {
+                int width = inputSequence.getWidth();
+                int height = inputSequence.getHeight();
 
-            Sequence labeledSequence = new Sequence(inputSequence.getMetadata());
-            for (int t = 0; t < inputSequence.getSizeT(); t++)
-                for (int z = 0; z < inputSequence.getSizeZ(); z++)
-                    labeledSequence.setImage(t, z, new IcyBufferedImage(width, height, 1, DataType.USHORT));
+                Sequence labeledSequence = new Sequence(inputSequence.getMetadata());
+                for (int t = 0; t < inputSequence.getSizeT(); t++)
+                    for (int z = 0; z < inputSequence.getSizeZ(); z++)
+                        labeledSequence.setImage(t, z, new IcyBufferedImage(width, height, 1, DataType.USHORT));
 
-            short cpt = 1;
-            for (ROI roi : inputSequence.getROIs())
-                DataIteratorUtil.set(new SequenceDataIterator(labeledSequence, roi, true), cpt++ & 0xffff);
+                short cpt = 1;
+                for (ROI roi : inputSequence.getROIs())
+                    DataIteratorUtil.set(new SequenceDataIterator(labeledSequence, roi, true), cpt++ & 0xffff);
 
-            componentsMap = extractConnectedComponents(labeledSequence, 0, ExtractionType.BACKGROUND_LABELED,
-                    discardEdgesX.getValue(), discardEdgesY.getValue(), discardEdgesAlongZ, min, max, output);
+                componentsMap = extractConnectedComponents(labeledSequence, 0, ExtractionType.BACKGROUND_LABELED,
+                        discardEdgesX.getValue(), discardEdgesY.getValue(), discardEdgesAlongZ, min, max, output);
+            }
+            else
+            {
+                componentsMap = extractConnectedComponents(inputSequence, background.getValue(),
+                        extractionMethod.getValue(), discardEdgesX.getValue(), discardEdgesY.getValue(),
+                        discardEdgesAlongZ, min, max, output);
+            }
         }
-        else
+        catch (InterruptedException e)
         {
-            componentsMap = extractConnectedComponents(inputSequence, background.getValue(),
-                    extractionMethod.getValue(), discardEdgesX.getValue(), discardEdgesY.getValue(), discardEdgesAlongZ,
-                    min, max, output);
+            new FailedAnnounceFrame(e.getMessage());
+            return;
         }
 
         outputSequence.setValue(output);
@@ -1347,8 +1356,10 @@ public class ConnectedComponents extends EzPlug implements Block
      * 
      * @param output
      *        a sequence of type INT
-     * @param components Map of List of ConnectedComponent
-     * @param comparator Comparator of ConnectedComponents
+     * @param components
+     *        Map of List of ConnectedComponent
+     * @param comparator
+     *        Comparator of ConnectedComponents
      */
     public static void createLabeledSequence(Sequence output, Map<Integer, List<ConnectedComponent>> components,
             Comparator<ConnectedComponent> comparator)
