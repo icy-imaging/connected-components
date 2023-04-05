@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-		<artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <version>2.0.0</version>
+        <artifactId>pom-icy</artifactId>
+        <version>2.2.0</version>
     </parent>
 
     <artifactId>connected-components</artifactId>
-    <version>4.8.8</version>
+    <version>4.8.9</version>
 
     <packaging>jar</packaging>
 
@@ -22,55 +22,36 @@
         Output can be pushed to the swimming pool for other plug-ins to further exploit the extracted objects.
     </description>
 
-	<profiles>
-		<profile>
-			<id>icy-plugin</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-		</profile>
-	</profiles>
-	
     <dependencies>
-		<dependency>
+        <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-kernel</artifactId>
-			<version>${icy-kernel.version}</version>
+            <artifactId>ezplug</artifactId>
         </dependency>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>blocks</artifactId>
-			<version>${blocks.version}</version>
+            <artifactId>protocols</artifactId>
         </dependency>
-		<dependency>
+
+        <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-bioformats</artifactId>
-			<version>${icy-bioformats.version}</version>
-        </dependency>
-		<dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>jama</artifactId>
-            <version>${jama.version}</version>
-        </dependency>
-		<dependency>
-            <groupId>net.sourceforge.jexcelapi</groupId>
-            <artifactId>jxl</artifactId>
-			<version>${jxl.version}</version>
+            <artifactId>vecmath</artifactId>
         </dependency>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>spot-detection-utilities</artifactId>
-            <version>${spot-detection-utilities.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>quickhull</artifactId>
-            <version>${quickhull.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>vecmath</artifactId>
-            <version>${vecmath.version}</version>
+            <artifactId>jama</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sourceforge.jexcelapi</groupId>
+            <artifactId>jxl</artifactId>
         </dependency>
     </dependencies>
 

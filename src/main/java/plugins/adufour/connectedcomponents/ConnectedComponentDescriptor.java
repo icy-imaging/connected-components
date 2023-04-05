@@ -25,9 +25,8 @@ import plugins.adufour.quickhull.QuickHull3D;
 import plugins.adufour.vars.lang.Var;
 import plugins.adufour.vars.lang.VarDouble;
 
-public class ConnectedComponentDescriptor extends Plugin implements PluginBundled, Block
-{
-    Var<ConnectedComponent> varCC = new Var<ConnectedComponent>("Connected component", ConnectedComponent.class);
+public class ConnectedComponentDescriptor extends Plugin implements PluginBundled, Block {
+    Var<ConnectedComponent> varCC = new Var<>("Connected component", ConnectedComponent.class);
 
     VarDouble perimeter = new VarDouble("perimeter", 0.0);
 
@@ -42,20 +41,17 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
     VarDouble shortAxisZ = new VarDouble("short diameter (Z)", 0.0);
 
     @Override
-    public String getMainPluginClassName()
-    {
+    public String getMainPluginClassName() {
         return ConnectedComponents.class.getName();
     }
 
     @Override
-    public void declareInput(VarList inputMap)
-    {
+    public void declareInput(VarList inputMap) {
         inputMap.add("component", varCC);
     }
 
     @Override
-    public void declareOutput(VarList outputMap)
-    {
+    public void declareOutput(VarList outputMap) {
         outputMap.add("perimeter", perimeter);
         outputMap.add("long diameter", longAxis);
         outputMap.add("short diameter", shortAxis);
@@ -65,8 +61,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
     }
 
     @Override
-    public void run()
-    {
+    public void run() {
         ConnectedComponent cc = varCC.getValue();
 
         if (cc == null)
@@ -85,32 +80,26 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
 
     /**
      * @param cc ConnectedComponent
-     * @return a triplet representing the radiuses of the best fitting ellipse (the third value is 0
-     *         for 2D objects)
+     * @return a triplet representing the radius of the best fitting ellipse (the third value is 0
+     * for 2D objects)
      */
-    public double[] computeEllipseDimensions(ConnectedComponent cc)
-    {
+    public double[] computeEllipseDimensions(ConnectedComponent cc) {
         double[] axes = new double[3];
 
-        try
-        {
-            if (is2D(cc))
-            {
+        try {
+            if (is2D(cc)) {
                 Point2d radii = new Point2d();
                 computeEllipse(cc, null, radii, null, null);
-                if (radii.x > radii.y)
-                {
+                if (radii.x > radii.y) {
                     axes[0] = radii.x;
                     axes[1] = radii.y;
                 }
-                else
-                {
+                else {
                     axes[0] = radii.y;
                     axes[1] = radii.x;
                 }
             }
-            else
-            {
+            else {
                 Point3d radii = new Point3d();
                 computeEllipse(cc, null, radii, null, null);
                 axes[0] = radii.x;
@@ -118,8 +107,8 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
                 axes[2] = radii.z;
             }
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
+            // Do nothing
         }
 
         return axes;
@@ -127,40 +116,31 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
 
     /**
      * Computes the bounding box of this component, and stores the result into the given arguments
-     * 
-     * @param cc
-     *        the input component
-     * @param minBounds
-     *        the first corner of the bounding box in X-Y-Z order (Upper-Left hand-Top)
-     * @param maxBounds
-     *        the second corner of the bounding box in X-Y-Z order (Lower-Right hand-Bottom)
+     *
+     * @param cc        the input component
+     * @param minBounds the first corner of the bounding box in X-Y-Z order (Upper-Left hand-Top)
+     * @param maxBounds the second corner of the bounding box in X-Y-Z order (Lower-Right hand-Bottom)
      */
-    public void computeBoundingBox(ConnectedComponent cc, Point3i minBounds, Point3i maxBounds)
-    {
-        if (minBounds != null)
-        {
+    public void computeBoundingBox(ConnectedComponent cc, Point3i minBounds, Point3i maxBounds) {
+        if (minBounds != null) {
             minBounds.x = Integer.MAX_VALUE;
             minBounds.y = Integer.MAX_VALUE;
             minBounds.z = Integer.MAX_VALUE;
         }
 
-        if (maxBounds != null)
-        {
+        if (maxBounds != null) {
             maxBounds.x = 0;
             maxBounds.y = 0;
             maxBounds.z = 0;
         }
 
-        for (Point3i point : cc)
-        {
-            if (minBounds != null)
-            {
+        for (Point3i point : cc) {
+            if (minBounds != null) {
                 minBounds.x = Math.min(minBounds.x, point.x);
                 minBounds.y = Math.min(minBounds.y, point.y);
                 minBounds.z = Math.min(minBounds.z, point.z);
             }
-            if (maxBounds != null)
-            {
+            if (maxBounds != null) {
                 maxBounds.x = Math.max(maxBounds.x, point.x);
                 maxBounds.y = Math.max(maxBounds.y, point.y);
                 maxBounds.z = Math.max(maxBounds.z, point.z);
@@ -170,32 +150,25 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
 
     /**
      * Computes the bounding box of this component, and stores the result into the given arguments
-     * 
-     * @param cc
-     *        the input component
-     * @param bsCenter
-     *        the computed center of the bounding sphere
-     * @param bsRadius
-     *        the computed radius of the bounding sphere
+     *
+     * @param cc       the input component
+     * @param bsCenter the computed center of the bounding sphere
+     * @param bsRadius the computed radius of the bounding sphere
      */
-    public void computeBoundingSphere(ConnectedComponent cc, Point3d bsCenter, VarDouble bsRadius)
-    {
+    public void computeBoundingSphere(ConnectedComponent cc, Point3d bsCenter, VarDouble bsRadius) {
         bsCenter.set(cc.getMassCenter());
         bsRadius.setValue(cc.getMaxDistanceTo(bsCenter));
     }
 
     /**
-     * @param cc ConnectedComponent
-     * @param contourPoints
-     *        (set to <code>null</code> if not wanted) an output list of extracted contour
-     *        points
-     * @param outputSequence
-     *        (set to <code>null</code> if not wanted) an output sequence to receive the
-     *        extracted contour
+     * @param cc             ConnectedComponent
+     * @param contourPoints  (set to <code>null</code> if not wanted) an output list of extracted contour
+     *                       points
+     * @param outputSequence (set to <code>null</code> if not wanted) an output sequence to receive the
+     *                       extracted contour
      * @return The 3D perimeter (or 3D surface) of this component
      */
-    public double computePerimeter(ConnectedComponent cc, ArrayList<Point3i> contourPoints, Sequence outputSequence)
-    {
+    public double computePerimeter(ConnectedComponent cc, ArrayList<Point3i> contourPoints, Sequence outputSequence) {
         double perimeter = 0;
 
         if (contourPoints != null)
@@ -212,8 +185,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
 
         byte[][] outputMask = null;
 
-        if (outputSequence != null)
-        {
+        if (outputSequence != null) {
             outputSequence.removeAllImages();
             for (int i = 0; i < d; i++)
                 outputSequence.setImage(0, i, new IcyBufferedImage(w, h, 1, DataType.UBYTE));
@@ -234,8 +206,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
         // count the edges and corners in 2D/3D
         double a = 0, b = 0;
 
-        for (Point3i p : cc)
-        {
+        for (Point3i p : cc) {
             localP.sub(p, min);
 
             int xy = localP.y * w + localP.x;
@@ -252,16 +223,14 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
                 nbEdges++;
             if (localP.y == h - 1 || z[xy + w] == 0)
                 nbEdges++;
-            if (min.z != max.z)
-            { // 3D
+            if (min.z != max.z) { // 3D
                 if (localP.z == 0 || mask_z_xy[localP.z - 1][xy] == 0)
                     nbEdges++;
                 if (localP.z == d - 1 || mask_z_xy[localP.z + 1][xy] == 0)
                     nbEdges++;
             }
 
-            switch (nbEdges)
-            {
+            switch (nbEdges) {
                 case 0:
                     break;
                 case 1:
@@ -280,8 +249,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
                     perimeter += Math.sqrt(3);
             }
 
-            if (nbEdges > 0)
-            {
+            if (nbEdges > 0) {
                 if (contourPoints != null)
                     contourPoints.add(p);
                 if (outputMask != null)
@@ -305,13 +273,11 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * NOTE: the circularity index is adjusted to work with digitized contours, and partially
      * corrects for digitization artifacts (see the
      * {@link #computePerimeter(ConnectedComponent, ArrayList, Sequence)} method)
-     * 
-     * @param cc
-     *        the input component
+     *
+     * @param cc the input component
      * @return 1 for a perfect circle (or sphere), and lower than 1 otherwise
      */
-    public double computeSphericity(ConnectedComponent cc)
-    {
+    public double computeSphericity(ConnectedComponent cc) {
         double dim = is2D(cc) ? 2.0 : 3.0;
 
         double area = cc.getSize();
@@ -342,38 +308,30 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * Computes the eccentricity of the given component. This method fits an ellipse with radii a
      * and b (in 2D) or an ellipsoid with radii a, b and c (in 3D) and returns in both cases the
      * ratio b/a
-     * 
-     * @param cc
-     *        the input component
+     *
+     * @param cc the input component
      * @return the ratio b/a, where a and b are the two first largest ellipse radii (there are only
-     *         two in 2D)
+     * two in 2D)
      */
-    public double computeEccentricity(ConnectedComponent cc)
-    {
-        if (is2D(cc))
-        {
-            try
-            {
+    public double computeEccentricity(ConnectedComponent cc) {
+        if (is2D(cc)) {
+            try {
                 Point2d radii = new Point2d();
                 computeEllipse(cc, null, radii, null, null);
                 return radii.x / radii.y;
             }
-            catch (RuntimeException e)
-            {
+            catch (RuntimeException e) {
                 // error during the ellipse computation
                 return Double.NaN;
             }
         }
-        else
-        {
+        else {
             Point3d radii = new Point3d();
-            try
-            {
+            try {
                 computeEllipse(cc, null, radii, null, null);
                 return radii.x / radii.y;
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 return Double.NaN;
             }
         }
@@ -382,10 +340,9 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
     /**
      * @param cc ConnectedComponent
      * @return The hull ratio, measured as the ratio between the object volume and its convex hull
-     *         (envelope)
+     * (envelope)
      */
-    public double computeHullRatio(ConnectedComponent cc)
-    {
+    public double computeHullRatio(ConnectedComponent cc) {
         double hull = computeConvexAreaAndVolume(cc)[1];
 
         return hull == 0.0 ? 0.0 : Math.min(1.0, cc.getSize() / hull);
@@ -394,21 +351,19 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
     /**
      * @param cc ConnectedComponent
      * @return An array containing [contour, area] of the smallest convex envelope surrounding the
-     *         object. The 2 values are returned together because their computation is simultaneous
-     *         (in the 3D case only)
+     * object. The 2 values are returned together because their computation is simultaneous
+     * (in the 3D case only)
      */
-    public double[] computeConvexAreaAndVolume(ConnectedComponent cc)
-    {
+    public double[] computeConvexAreaAndVolume(ConnectedComponent cc) {
         int i = 0, n = cc.getSize();
         if (n == 1)
-            return new double[] {0.0, 1.0};
+            return new double[]{0.0, 1.0};
 
         double contour = 0.0;
         double area = 0.0;
 
-        if (is2D(cc))
-        {
-            List<Point2D> points = new ArrayList<Point2D>();
+        if (is2D(cc)) {
+            List<Point2D> points = new ArrayList<>();
 
             for (Point3i p : cc)
                 points.add(new Point2D.Double(p.x, p.y));
@@ -419,10 +374,9 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
             // volume = sum( sqrt[ (x[i] - x[i-1])^2 + (y[i] - y[i-1])^2 ] )
             // area = 0.5 * sum( (x[i-1] * y[i]) - (y[i-1] * x[i]) )
 
-            Point2D p1 = points.get(points.size() - 1), p2 = null;
+            Point2D p1 = points.get(points.size() - 1), p2;
 
-            for (i = 0; i < points.size(); i++)
-            {
+            for (i = 0; i < points.size(); i++) {
                 p2 = points.get(i);
                 contour += p1.distance(p2);
                 area += (p2.getX() * p1.getY()) - (p2.getY() * p1.getX());
@@ -432,8 +386,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
             area *= 0.5;
         }
         else
-            try
-            {
+            try {
                 Point3d[] points = new Point3d[n];
 
                 for (Point3i p : cc)
@@ -447,8 +400,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
                 Vector3d v13 = new Vector3d();
                 Vector3d cross = new Vector3d();
 
-                for (int[] face : hullFaces)
-                {
+                for (int[] face : hullFaces) {
                     Point3d p1 = hullPoints[face[0]];
                     Point3d p2 = hullPoints[face[1]];
                     Point3d p3 = hullPoints[face[2]];
@@ -463,41 +415,33 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
                     area += contour * cross.x * (p1.x + p2.x + p3.x);
                 }
             }
-            catch (IllegalArgumentException e)
-            {
+            catch (IllegalArgumentException e) {
                 // less than 4 points, or coplanarity detected
-                return new double[] {n, n};
+                return new double[]{n, n};
             }
 
-        return new double[] {contour, area};
+        return new double[]{contour, area};
     }
 
     /**
      * Computes the geometric moment of the given component
-     * 
-     * @param cc
-     *        the input component
-     * @param p
-     *        the moment order along X
-     * @param q
-     *        the moment order along Y
-     * @param r
-     *        the moment order along Z (set to 0 if the object is 2D)
+     *
+     * @param cc the input component
+     * @param p  the moment order along X
+     * @param q  the moment order along Y
+     * @param r  the moment order along Z (set to 0 if the object is 2D)
      * @return the geometric moment
      */
-    public double computeGeometricMoment(ConnectedComponent cc, int p, int q, int r)
-    {
+    public double computeGeometricMoment(ConnectedComponent cc, int p, int q, int r) {
         double moment = 0;
 
         Point3d center = cc.getMassCenter();
 
-        if (is2D(cc))
-        {
+        if (is2D(cc)) {
             for (Point3i point : cc)
                 moment += Math.pow(point.x - center.x, p) * Math.pow(point.y - center.y, q);
         }
-        else
-        {
+        else {
             for (Point3i point : cc)
                 moment += Math.pow(point.x - center.x, p) * Math.pow(point.y - center.y, q)
                         * Math.pow(point.z - center.z, r);
@@ -508,38 +452,28 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
     /**
      * Compute the best fitting ellipsoid for the given component.<br>
      * This method is adapted from Yury Petrov's Matlab code and ported to Java by the BoneJ project
-     * 
-     * @param cc
-     *        the component to fit
-     * @param center
-     *        (set to null if not wanted) the calculated ellipsoid center
-     * @param radii
-     *        (set to null if not wanted) the calculated ellipsoid radius in each
-     *        eigen-direction
-     * @param eigenVectors
-     *        (set to null if not wanted) the calculated ellipsoid eigen-vectors
-     * @param equation
-     *        (set to null if not wanted) an array of size 9 containing the calculated ellipsoid
-     *        equation
-     * @throws IllegalArgumentException
-     *         if the number of points in the component is too low (minimum is 9)
-     * @throws SingularMatrixException
-     *         if the component is flat (i.e. lies in a 2D plane)
+     *
+     * @param cc           the component to fit
+     * @param center       (set to null if not wanted) the calculated ellipsoid center
+     * @param radii        (set to null if not wanted) the calculated ellipsoid radius in each
+     *                     eigen-direction
+     * @param eigenVectors (set to null if not wanted) the calculated ellipsoid eigen-vectors
+     * @param equation     (set to null if not wanted) an array of size 9 containing the calculated ellipsoid
+     *                     equation
+     * @throws IllegalArgumentException if the number of points in the component is too low (minimum is 9)
+     * @throws SingularMatrixException  if the component is flat (i.e. lies in a 2D plane)
      */
     public void computeEllipse(ConnectedComponent cc, Point3d center, Point3d radii, Vector3d[] eigenVectors,
-            double[] equation) throws IllegalArgumentException
-    {
+                               double[] equation) throws IllegalArgumentException {
         int nPoints = cc.getSize();
-        if (nPoints < 9)
-        {
+        if (nPoints < 9) {
             throw new IllegalArgumentException("Too few points; need at least 9 to calculate a unique ellipsoid");
         }
 
         Point3i[] points = cc.getPoints();
 
         double[][] d = new double[nPoints][9];
-        for (int i = 0; i < nPoints; i++)
-        {
+        for (int i = 0; i < nPoints; i++) {
             double x = points[i].x;
             double y = points[i].y;
             double z = points[i].z;
@@ -558,12 +492,10 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
         Matrix ones = ones(nPoints, 1);
 
         Matrix V;
-        try
-        {
+        try {
             V = D.transpose().times(D).inverse().times(D.transpose().times(ones));
         }
-        catch (RuntimeException e)
-        {
+        catch (RuntimeException e) {
             throw new SingularMatrixException("The component is most probably flat (i.e. lies in a 2D plane)");
         }
 
@@ -590,8 +522,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
         if (center != null)
             center.set(C.get(0, 0), C.get(1, 0), C.get(2, 0));
 
-        if (eigenVectors != null && eigenVectors.length == 3)
-        {
+        if (eigenVectors != null && eigenVectors.length == 3) {
             eigenVectors[0] = new Vector3d(eVec.get(0, 0), eVec.get(0, 1), eVec.get(0, 2));
             eigenVectors[1] = new Vector3d(eVec.get(1, 0), eVec.get(1, 1), eVec.get(1, 2));
             eigenVectors[2] = new Vector3d(eVec.get(2, 0), eVec.get(2, 1), eVec.get(2, 2));
@@ -603,34 +534,26 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
     /**
      * 2D direct ellipse fitting.<br>
      * (Java port of Chernov's MATLAB implementation of the direct ellipse fit)
-     * 
-     * @param cc
-     *        the component to fit
-     * @param center
-     *        (set to null if not wanted) the calculated ellipse center
-     * @param radii
-     *        (set to null if not wanted) the calculated ellipse radius in each eigen-direction
-     * @param angle
-     *        (set to null if not wanted) the calculated ellipse orientation
-     * @param equation
-     *        (set to null if not wanted) a 6-element array, {a b c d f g}, which are the
-     *        calculated algebraic parameters of the fitting ellipse: <i>ax</i><sup>2</sup> + 2
-     *        <i>bxy</i> + <i>cy</i><sup>2</sup> +2<i>dx</i> + 2<i>fy</i> + <i>g</i> = 0. The
-     *        vector <b>A</b> represented in the array is normed, so that ||<b>A</b>||=1.
-     * @throws RuntimeException
-     *         if the ellipse calculation fails (e.g. if a singular matrix is detected)
+     *
+     * @param cc       the component to fit
+     * @param center   (set to null if not wanted) the calculated ellipse center
+     * @param radii    (set to null if not wanted) the calculated ellipse radius in each eigen-direction
+     * @param angle    (set to null if not wanted) the calculated ellipse orientation
+     * @param equation (set to null if not wanted) a 6-element array, {a b c d f g}, which are the
+     *                 calculated algebraic parameters of the fitting ellipse: <i>ax</i><sup>2</sup> + 2
+     *                 <i>bxy</i> + <i>cy</i><sup>2</sup> +2<i>dx</i> + 2<i>fy</i> + <i>g</i> = 0. The
+     *                 vector <b>A</b> represented in the array is normed, so that ||<b>A</b>||=1.
+     * @throws RuntimeException if the ellipse calculation fails (e.g. if a singular matrix is detected)
      */
     public void computeEllipse(ConnectedComponent cc, Point2d center, Point2d radii, VarDouble angle, double[] equation)
-            throws RuntimeException
-    {
+            throws RuntimeException {
         Point3i[] points = cc.getPoints();
         Point3d ccenter = cc.getMassCenter();
 
         double[][] d1 = new double[cc.getSize()][3];
         double[][] d2 = new double[cc.getSize()][3];
 
-        for (int i = 0; i < d1.length; i++)
-        {
+        for (int i = 0; i < d1.length; i++) {
             final double xixC = points[i].x - ccenter.x;
             final double yiyC = points[i].y - ccenter.y;
 
@@ -672,10 +595,8 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
         Matrix cond = (R1.times(4)).arrayTimes(R3).minus(R2.arrayTimes(R2));
 
         int _f = 0;
-        for (int i = 0; i < 3; i++)
-        {
-            if (cond.get(0, i) > 0)
-            {
+        for (int i = 0; i < 3; i++) {
+            if (cond.get(0, i) > 0) {
                 _f = i;
                 break;
             }
@@ -717,23 +638,27 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
         // semiaxis length
         final double af = 2 * (a * f * f + c * d * d + g * b * b - 2 * b * d * f - a * c * g);
 
-        final double aL = Math.sqrt((af) / ((b * b - a * c) * (Math.sqrt((a - c) * (a - c) + 4 * b * b) - (a + c))));
+        final double sqrt = Math.sqrt((a - c) * (a - c) + 4 * b * b);
+        //final double aL = Math.sqrt((af) / ((b * b - a * c) * (Math.sqrt((a - c) * (a - c) + 4 * b * b) - (a + c))));
+        final double aL = Math.sqrt((af) / ((b * b - a * c) * (sqrt - (a + c))));
+        //final double bL = Math.sqrt((af) / ((b * b - a * c) * (-Math.sqrt((a - c) * (a - c) + 4 * b * b) - (a + c))));
+        final double bL = Math.sqrt((af) / ((b * b - a * c) * (-sqrt - (a + c))));
 
-        final double bL = Math.sqrt((af) / ((b * b - a * c) * (-Math.sqrt((a - c) * (a - c) + 4 * b * b) - (a + c))));
         double phi = 0;
-        if (b == 0)
-        {
+        if (b == 0) {
             if (a <= c)
                 phi = 0;
-            else if (a > c)
+            else
                 phi = Math.PI / 2;
         }
-        else
-        {
+        else {
+            final double atan = Math.atan(2 * b / (a - c)) / 2;
             if (a < c)
-                phi = Math.atan(2 * b / (a - c)) / 2;
+                //phi = Math.atan(2 * b / (a - c)) / 2;
+                phi = atan;
             else if (a > c)
-                phi = Math.atan(2 * b / (a - c)) / 2 + Math.PI / 2;
+                //phi = Math.atan(2 * b / (a - c)) / 2 + Math.PI / 2;
+                phi = atan + Math.PI / 2;
         }
 
         if (center != null)
@@ -744,8 +669,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
             angle.setValue(phi);
     }
 
-    public boolean is2D(ConnectedComponent cc)
-    {
+    public boolean is2D(ConnectedComponent cc) {
         Point3i minBB = new Point3i();
         Point3i maxBB = new Point3i();
         computeBoundingBox(cc, minBB, maxBB);
@@ -753,19 +677,16 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
         return minBB.z == maxBB.z;
     }
 
-    private Matrix diag(Matrix matrix)
-    {
+    private Matrix diag(Matrix matrix) {
         int min = Math.min(matrix.getRowDimension(), matrix.getColumnDimension());
         double[][] diag = new double[min][1];
-        for (int i = 0; i < min; i++)
-        {
+        for (int i = 0; i < min; i++) {
             diag[i][0] = matrix.get(i, i);
         }
         return new Matrix(diag);
     }
 
-    private Matrix ones(int m, int n)
-    {
+    private Matrix ones(int m, int n) {
         double[][] array = new double[m][n];
         for (double[] row : array)
             Arrays.fill(row, 1.0);
