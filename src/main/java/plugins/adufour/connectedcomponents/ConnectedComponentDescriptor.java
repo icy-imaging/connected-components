@@ -1,15 +1,22 @@
+/*
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package plugins.adufour.connectedcomponents;
-
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3i;
-import javax.vecmath.SingularMatrixException;
-import javax.vecmath.Vector3d;
 
 import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
@@ -24,6 +31,12 @@ import plugins.adufour.quickhull.QuickHull2D;
 import plugins.adufour.quickhull.QuickHull3D;
 import plugins.adufour.vars.lang.Var;
 import plugins.adufour.vars.lang.VarDouble;
+
+import javax.vecmath.*;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ConnectedComponentDescriptor extends Plugin implements PluginBundled, Block {
     Var<ConnectedComponent> varCC = new Var<>("Connected component", ConnectedComponent.class);
@@ -46,12 +59,12 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
     }
 
     @Override
-    public void declareInput(VarList inputMap) {
+    public void declareInput(final VarList inputMap) {
         inputMap.add("component", varCC);
     }
 
     @Override
-    public void declareOutput(VarList outputMap) {
+    public void declareOutput(final VarList outputMap) {
         outputMap.add("perimeter", perimeter);
         outputMap.add("long diameter", longAxis);
         outputMap.add("short diameter", shortAxis);
@@ -62,14 +75,14 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
 
     @Override
     public void run() {
-        ConnectedComponent cc = varCC.getValue();
+        final ConnectedComponent cc = varCC.getValue();
 
         if (cc == null)
             return;
 
         perimeter.setValue(computePerimeter(cc, null, null));
 
-        double[] ellipseDimensions = computeEllipseDimensions(cc);
+        final double[] ellipseDimensions = computeEllipseDimensions(cc);
 
         longAxis.setValue(ellipseDimensions[0] * 2);
         shortAxis.setValue(ellipseDimensions[1] * 2);
@@ -83,12 +96,12 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * @return a triplet representing the radius of the best fitting ellipse (the third value is 0
      * for 2D objects)
      */
-    public double[] computeEllipseDimensions(ConnectedComponent cc) {
-        double[] axes = new double[3];
+    public double[] computeEllipseDimensions(final ConnectedComponent cc) {
+        final double[] axes = new double[3];
 
         try {
             if (is2D(cc)) {
-                Point2d radii = new Point2d();
+                final Point2d radii = new Point2d();
                 computeEllipse(cc, null, radii, null, null);
                 if (radii.x > radii.y) {
                     axes[0] = radii.x;
@@ -100,14 +113,14 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
                 }
             }
             else {
-                Point3d radii = new Point3d();
+                final Point3d radii = new Point3d();
                 computeEllipse(cc, null, radii, null, null);
                 axes[0] = radii.x;
                 axes[1] = radii.y;
                 axes[2] = radii.z;
             }
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             // Do nothing
         }
 
@@ -121,7 +134,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * @param minBounds the first corner of the bounding box in X-Y-Z order (Upper-Left hand-Top)
      * @param maxBounds the second corner of the bounding box in X-Y-Z order (Lower-Right hand-Bottom)
      */
-    public void computeBoundingBox(ConnectedComponent cc, Point3i minBounds, Point3i maxBounds) {
+    public void computeBoundingBox(final ConnectedComponent cc, final Point3i minBounds, final Point3i maxBounds) {
         if (minBounds != null) {
             minBounds.x = Integer.MAX_VALUE;
             minBounds.y = Integer.MAX_VALUE;
@@ -134,7 +147,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
             maxBounds.z = 0;
         }
 
-        for (Point3i point : cc) {
+        for (final Point3i point : cc) {
             if (minBounds != null) {
                 minBounds.x = Math.min(minBounds.x, point.x);
                 minBounds.y = Math.min(minBounds.y, point.y);
@@ -155,7 +168,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * @param bsCenter the computed center of the bounding sphere
      * @param bsRadius the computed radius of the bounding sphere
      */
-    public void computeBoundingSphere(ConnectedComponent cc, Point3d bsCenter, VarDouble bsRadius) {
+    public void computeBoundingSphere(final ConnectedComponent cc, final Point3d bsCenter, final VarDouble bsRadius) {
         bsCenter.set(cc.getMassCenter());
         bsRadius.setValue(cc.getMaxDistanceTo(bsCenter));
     }
@@ -168,20 +181,21 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      *                       extracted contour
      * @return The 3D perimeter (or 3D surface) of this component
      */
-    public double computePerimeter(ConnectedComponent cc, ArrayList<Point3i> contourPoints, Sequence outputSequence) {
+    public double computePerimeter(final ConnectedComponent cc, final ArrayList<Point3i> contourPoints, final Sequence outputSequence) {
         double perimeter = 0;
 
         if (contourPoints != null)
             contourPoints.ensureCapacity(cc.getSize() / 2);
 
-        Point3i min = new Point3i(), max = new Point3i();
+        final Point3i min = new Point3i();
+        final Point3i max = new Point3i();
         computeBoundingBox(cc, min, max);
 
-        Sequence mask = cc.toSequence();
+        final Sequence mask = cc.toSequence();
         final boolean outputVolatile;
-        int w = mask.getSizeX();
-        int h = mask.getSizeY();
-        int d = mask.getSizeZ();
+        final int w = mask.getSizeX();
+        final int h = mask.getSizeY();
+        final int d = mask.getSizeZ();
 
         byte[][] outputMask = null;
 
@@ -199,19 +213,19 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
         else
             outputVolatile = false;
 
-        byte[][] mask_z_xy = mask.getDataXYZAsByte(0, 0);
+        final byte[][] mask_z_xy = mask.getDataXYZAsByte(0, 0);
 
-        Point3i localP = new Point3i();
+        final Point3i localP = new Point3i();
 
         // count the edges and corners in 2D/3D
         double a = 0, b = 0;
 
-        for (Point3i p : cc) {
+        for (final Point3i p : cc) {
             localP.sub(p, min);
 
-            int xy = localP.y * w + localP.x;
+            final int xy = localP.y * w + localP.x;
 
-            byte[] z = mask_z_xy[localP.z];
+            final byte[] z = mask_z_xy[localP.z];
 
             int nbEdges = 0;
 
@@ -277,11 +291,11 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * @param cc the input component
      * @return 1 for a perfect circle (or sphere), and lower than 1 otherwise
      */
-    public double computeSphericity(ConnectedComponent cc) {
-        double dim = is2D(cc) ? 2.0 : 3.0;
+    public double computeSphericity(final ConnectedComponent cc) {
+        final double dim = is2D(cc) ? 2.0 : 3.0;
 
-        double area = cc.getSize();
-        double peri = computePerimeter(cc, null, null);
+        final double area = cc.getSize();
+        final double peri = computePerimeter(cc, null, null);
 
         // some verification code
         //
@@ -298,7 +312,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
         //
         // end of the verification code
 
-        double sph = (Math.pow(Math.PI, 1.0 / dim) / peri) * Math.pow(area * dim * 2, (dim - 1) / dim);
+        final double sph = (Math.pow(Math.PI, 1.0 / dim) / peri) * Math.pow(area * dim * 2, (dim - 1) / dim);
 
         // adjust final rounding off errors (sphericity is always below 1)
         return Math.min(1.0, sph);
@@ -313,25 +327,25 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * @return the ratio b/a, where a and b are the two first largest ellipse radii (there are only
      * two in 2D)
      */
-    public double computeEccentricity(ConnectedComponent cc) {
+    public double computeEccentricity(final ConnectedComponent cc) {
         if (is2D(cc)) {
             try {
-                Point2d radii = new Point2d();
+                final Point2d radii = new Point2d();
                 computeEllipse(cc, null, radii, null, null);
                 return radii.x / radii.y;
             }
-            catch (RuntimeException e) {
+            catch (final RuntimeException e) {
                 // error during the ellipse computation
                 return Double.NaN;
             }
         }
         else {
-            Point3d radii = new Point3d();
+            final Point3d radii = new Point3d();
             try {
                 computeEllipse(cc, null, radii, null, null);
                 return radii.x / radii.y;
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 return Double.NaN;
             }
         }
@@ -342,8 +356,8 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * @return The hull ratio, measured as the ratio between the object volume and its convex hull
      * (envelope)
      */
-    public double computeHullRatio(ConnectedComponent cc) {
-        double hull = computeConvexAreaAndVolume(cc)[1];
+    public double computeHullRatio(final ConnectedComponent cc) {
+        final double hull = computeConvexAreaAndVolume(cc)[1];
 
         return hull == 0.0 ? 0.0 : Math.min(1.0, cc.getSize() / hull);
     }
@@ -354,8 +368,9 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * object. The 2 values are returned together because their computation is simultaneous
      * (in the 3D case only)
      */
-    public double[] computeConvexAreaAndVolume(ConnectedComponent cc) {
-        int i = 0, n = cc.getSize();
+    public double[] computeConvexAreaAndVolume(final ConnectedComponent cc) {
+        int i = 0;
+        final int n = cc.getSize();
         if (n == 1)
             return new double[]{0.0, 1.0};
 
@@ -365,7 +380,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
         if (is2D(cc)) {
             List<Point2D> points = new ArrayList<>();
 
-            for (Point3i p : cc)
+            for (final Point3i p : cc)
                 points.add(new Point2D.Double(p.x, p.y));
 
             if (points.size() > 4)
@@ -387,23 +402,23 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
         }
         else
             try {
-                Point3d[] points = new Point3d[n];
+                final Point3d[] points = new Point3d[n];
 
-                for (Point3i p : cc)
+                for (final Point3i p : cc)
                     points[i++] = new Point3d(p.x, p.y, p.z);
 
-                QuickHull3D qhull = new QuickHull3D(points);
-                int[][] hullFaces = qhull.getFaces();
-                Point3d[] hullPoints = qhull.getVertices();
+                final QuickHull3D qhull = new QuickHull3D(points);
+                final int[][] hullFaces = qhull.getFaces();
+                final Point3d[] hullPoints = qhull.getVertices();
 
-                Vector3d v12 = new Vector3d();
-                Vector3d v13 = new Vector3d();
-                Vector3d cross = new Vector3d();
+                final Vector3d v12 = new Vector3d();
+                final Vector3d v13 = new Vector3d();
+                final Vector3d cross = new Vector3d();
 
-                for (int[] face : hullFaces) {
-                    Point3d p1 = hullPoints[face[0]];
-                    Point3d p2 = hullPoints[face[1]];
-                    Point3d p3 = hullPoints[face[2]];
+                for (final int[] face : hullFaces) {
+                    final Point3d p1 = hullPoints[face[0]];
+                    final Point3d p2 = hullPoints[face[1]];
+                    final Point3d p3 = hullPoints[face[2]];
 
                     v12.sub(p2, p1);
                     v13.sub(p3, p1);
@@ -415,7 +430,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
                     area += contour * cross.x * (p1.x + p2.x + p3.x);
                 }
             }
-            catch (IllegalArgumentException e) {
+            catch (final IllegalArgumentException e) {
                 // less than 4 points, or coplanarity detected
                 return new double[]{n, n};
             }
@@ -432,17 +447,17 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * @param r  the moment order along Z (set to 0 if the object is 2D)
      * @return the geometric moment
      */
-    public double computeGeometricMoment(ConnectedComponent cc, int p, int q, int r) {
+    public double computeGeometricMoment(final ConnectedComponent cc, final int p, final int q, final int r) {
         double moment = 0;
 
-        Point3d center = cc.getMassCenter();
+        final Point3d center = cc.getMassCenter();
 
         if (is2D(cc)) {
-            for (Point3i point : cc)
+            for (final Point3i point : cc)
                 moment += Math.pow(point.x - center.x, p) * Math.pow(point.y - center.y, q);
         }
         else {
-            for (Point3i point : cc)
+            for (final Point3i point : cc)
                 moment += Math.pow(point.x - center.x, p) * Math.pow(point.y - center.y, q)
                         * Math.pow(point.z - center.z, r);
         }
@@ -461,22 +476,22 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * @param equation     (set to null if not wanted) an array of size 9 containing the calculated ellipsoid
      *                     equation
      * @throws IllegalArgumentException if the number of points in the component is too low (minimum is 9)
-     * @throws SingularMatrixException  if the component is flat (i.e. lies in a 2D plane)
+     * @throws SingularMatrixException  if the component is flat (i.e., lies in a 2D plane)
      */
-    public void computeEllipse(ConnectedComponent cc, Point3d center, Point3d radii, Vector3d[] eigenVectors,
-                               double[] equation) throws IllegalArgumentException {
-        int nPoints = cc.getSize();
+    public void computeEllipse(final ConnectedComponent cc, final Point3d center, final Point3d radii, final Vector3d[] eigenVectors,
+                               final double[] equation) throws IllegalArgumentException {
+        final int nPoints = cc.getSize();
         if (nPoints < 9) {
             throw new IllegalArgumentException("Too few points; need at least 9 to calculate a unique ellipsoid");
         }
 
-        Point3i[] points = cc.getPoints();
+        final Point3i[] points = cc.getPoints();
 
-        double[][] d = new double[nPoints][9];
+        final double[][] d = new double[nPoints][9];
         for (int i = 0; i < nPoints; i++) {
-            double x = points[i].x;
-            double y = points[i].y;
-            double z = points[i].z;
+            final double x = points[i].x;
+            final double y = points[i].y;
+            final double z = points[i].z;
             d[i][0] = (x * x);
             d[i][1] = (y * y);
             d[i][2] = (z * z);
@@ -488,32 +503,32 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
             d[i][8] = (2.0D * z);
         }
 
-        Matrix D = new Matrix(d);
-        Matrix ones = ones(nPoints, 1);
+        final Matrix D = new Matrix(d);
+        final Matrix ones = ones(nPoints, 1);
 
-        Matrix V;
+        final Matrix V;
         try {
             V = D.transpose().times(D).inverse().times(D.transpose().times(ones));
         }
-        catch (RuntimeException e) {
+        catch (final RuntimeException e) {
             throw new SingularMatrixException("The component is most probably flat (i.e. lies in a 2D plane)");
         }
 
-        double[] v = V.getColumnPackedCopy();
+        final double[] v = V.getColumnPackedCopy();
 
-        double[][] a = {{v[0], v[3], v[4], v[6]}, {v[3], v[1], v[5], v[7]}, {v[4], v[5], v[2], v[8]},
+        final double[][] a = {{v[0], v[3], v[4], v[6]}, {v[3], v[1], v[5], v[7]}, {v[4], v[5], v[2], v[8]},
                 {v[6], v[7], v[8], -1.0D}};
-        Matrix A = new Matrix(a);
-        Matrix C = A.getMatrix(0, 2, 0, 2).times(-1.0D).inverse().times(V.getMatrix(6, 8, 0, 0));
-        Matrix T = Matrix.identity(4, 4);
+        final Matrix A = new Matrix(a);
+        final Matrix C = A.getMatrix(0, 2, 0, 2).times(-1.0D).inverse().times(V.getMatrix(6, 8, 0, 0));
+        final Matrix T = Matrix.identity(4, 4);
         T.setMatrix(3, 3, 0, 2, C.transpose());
-        Matrix R = T.times(A.times(T.transpose()));
-        double r33 = R.get(3, 3);
-        Matrix R02 = R.getMatrix(0, 2, 0, 2);
-        EigenvalueDecomposition E = new EigenvalueDecomposition(R02.times(-1.0D / r33));
-        Matrix eVal = E.getD();
-        Matrix eVec = E.getV();
-        Matrix diagonal = diag(eVal);
+        final Matrix R = T.times(A.times(T.transpose()));
+        final double r33 = R.get(3, 3);
+        final Matrix R02 = R.getMatrix(0, 2, 0, 2);
+        final EigenvalueDecomposition E = new EigenvalueDecomposition(R02.times(-1.0D / r33));
+        final Matrix eVal = E.getD();
+        final Matrix eVec = E.getV();
+        final Matrix diagonal = diag(eVal);
 
         if (radii != null)
             radii.set(Math.sqrt(1.0D / diagonal.get(0, 0)), Math.sqrt(1.0D / diagonal.get(1, 0)),
@@ -543,15 +558,15 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      *                 calculated algebraic parameters of the fitting ellipse: <i>ax</i><sup>2</sup> + 2
      *                 <i>bxy</i> + <i>cy</i><sup>2</sup> +2<i>dx</i> + 2<i>fy</i> + <i>g</i> = 0. The
      *                 vector <b>A</b> represented in the array is normed, so that ||<b>A</b>||=1.
-     * @throws RuntimeException if the ellipse calculation fails (e.g. if a singular matrix is detected)
+     * @throws RuntimeException if the ellipse calculation fails (e.g., if a singular matrix is detected)
      */
-    public void computeEllipse(ConnectedComponent cc, Point2d center, Point2d radii, VarDouble angle, double[] equation)
+    public void computeEllipse(final ConnectedComponent cc, final Point2d center, final Point2d radii, final VarDouble angle, final double[] equation)
             throws RuntimeException {
-        Point3i[] points = cc.getPoints();
-        Point3d ccenter = cc.getMassCenter();
+        final Point3i[] points = cc.getPoints();
+        final Point3d ccenter = cc.getMassCenter();
 
-        double[][] d1 = new double[cc.getSize()][3];
-        double[][] d2 = new double[cc.getSize()][3];
+        final double[][] d1 = new double[cc.getSize()][3];
+        final double[][] d2 = new double[cc.getSize()][3];
 
         for (int i = 0; i < d1.length; i++) {
             final double xixC = points[i].x - ccenter.x;
@@ -566,33 +581,33 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
             d2[i][2] = 1;
         }
 
-        Matrix D1 = new Matrix(d1);
-        Matrix D2 = new Matrix(d2);
+        final Matrix D1 = new Matrix(d1);
+        final Matrix D2 = new Matrix(d2);
 
-        Matrix S1 = D1.transpose().times(D1);
+        final Matrix S1 = D1.transpose().times(D1);
 
-        Matrix S2 = D1.transpose().times(D2);
+        final Matrix S2 = D1.transpose().times(D2);
 
-        Matrix S3 = D2.transpose().times(D2);
+        final Matrix S3 = D2.transpose().times(D2);
 
-        Matrix T = (S3.inverse().times(-1)).times(S2.transpose());
+        final Matrix T = (S3.inverse().times(-1)).times(S2.transpose());
 
-        Matrix M = S1.plus(S2.times(T));
+        final Matrix M = S1.plus(S2.times(T));
 
-        double[][] m = M.getArray();
-        double[][] n = {{m[2][0] / 2, m[2][1] / 2, m[2][2] / 2}, {-m[1][0], -m[1][1], -m[1][2]},
+        final double[][] m = M.getArray();
+        final double[][] n = {{m[2][0] / 2, m[2][1] / 2, m[2][2] / 2}, {-m[1][0], -m[1][1], -m[1][2]},
                 {m[0][0] / 2, m[0][1] / 2, m[0][2] / 2}};
 
-        Matrix N = new Matrix(n);
+        final Matrix N = new Matrix(n);
 
-        EigenvalueDecomposition E = N.eig();
-        Matrix eVec = E.getV();
+        final EigenvalueDecomposition E = N.eig();
+        final Matrix eVec = E.getV();
 
-        Matrix R1 = eVec.getMatrix(0, 0, 0, 2);
-        Matrix R2 = eVec.getMatrix(1, 1, 0, 2);
-        Matrix R3 = eVec.getMatrix(2, 2, 0, 2);
+        final Matrix R1 = eVec.getMatrix(0, 0, 0, 2);
+        final Matrix R2 = eVec.getMatrix(1, 1, 0, 2);
+        final Matrix R3 = eVec.getMatrix(2, 2, 0, 2);
 
-        Matrix cond = (R1.times(4)).arrayTimes(R3).minus(R2.arrayTimes(R2));
+        final Matrix cond = (R1.times(4)).arrayTimes(R3).minus(R2.arrayTimes(R2));
 
         int _f = 0;
         for (int i = 0; i < 3; i++) {
@@ -601,16 +616,16 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
                 break;
             }
         }
-        Matrix A1 = eVec.getMatrix(0, 2, _f, _f);
+        final Matrix A1 = eVec.getMatrix(0, 2, _f, _f);
 
         Matrix A = new Matrix(6, 1);
         A.setMatrix(0, 2, 0, 0, A1);
         A.setMatrix(3, 5, 0, 0, T.times(A1));
 
         double[] ell = A.getColumnPackedCopy();
-        double a4 = ell[3] - 2 * ell[0] * ccenter.x - ell[1] * ccenter.y;
-        double a5 = ell[4] - 2 * ell[2] * ccenter.y - ell[1] * ccenter.x;
-        double a6 = ell[5] + ell[0] * ccenter.x * ccenter.x + ell[2] * ccenter.y * ccenter.y
+        final double a4 = ell[3] - 2 * ell[0] * ccenter.x - ell[1] * ccenter.y;
+        final double a5 = ell[4] - 2 * ell[2] * ccenter.y - ell[1] * ccenter.x;
+        final double a6 = ell[5] + ell[0] * ccenter.x * ccenter.x + ell[2] * ccenter.y * ccenter.y
                 + ell[1] * ccenter.x * ccenter.y - ell[3] * ccenter.x - ell[4] * ccenter.y;
         A.set(3, 0, a4);
         A.set(4, 0, a5);
@@ -669,26 +684,26 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
             angle.setValue(phi);
     }
 
-    public boolean is2D(ConnectedComponent cc) {
-        Point3i minBB = new Point3i();
-        Point3i maxBB = new Point3i();
+    public boolean is2D(final ConnectedComponent cc) {
+        final Point3i minBB = new Point3i();
+        final Point3i maxBB = new Point3i();
         computeBoundingBox(cc, minBB, maxBB);
 
         return minBB.z == maxBB.z;
     }
 
-    private Matrix diag(Matrix matrix) {
-        int min = Math.min(matrix.getRowDimension(), matrix.getColumnDimension());
-        double[][] diag = new double[min][1];
+    private Matrix diag(final Matrix matrix) {
+        final int min = Math.min(matrix.getRowDimension(), matrix.getColumnDimension());
+        final double[][] diag = new double[min][1];
         for (int i = 0; i < min; i++) {
             diag[i][0] = matrix.get(i, i);
         }
         return new Matrix(diag);
     }
 
-    private Matrix ones(int m, int n) {
-        double[][] array = new double[m][n];
-        for (double[] row : array)
+    private Matrix ones(final int m, final int n) {
+        final double[][] array = new double[m][n];
+        for (final double[] row : array)
             Arrays.fill(row, 1.0);
         return new Matrix(array, m, n);
     }

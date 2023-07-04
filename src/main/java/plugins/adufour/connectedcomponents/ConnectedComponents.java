@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package plugins.adufour.connectedcomponents;
 
 import java.io.File;
@@ -97,7 +115,7 @@ public class ConnectedComponents extends EzPlug implements Block {
          */
         public final Comparator<ConnectedComponent> comparator;
 
-        Sorting(Comparator<ConnectedComponent> comparator) {
+        Sorting(final Comparator<ConnectedComponent> comparator) {
             this.comparator = comparator;
         }
     }
@@ -141,7 +159,7 @@ public class ConnectedComponents extends EzPlug implements Block {
         addEzComponent(input);
         input.addVarChangeListener((source, newValue) -> {
             if (newValue != null) {
-                boolean doZ = newValue.getSizeZ() > 1;
+                final boolean doZ = newValue.getSizeZ() > 1;
                 discardEdgesZ.setValue(doZ);
                 discardEdgesZ.setVisible(doZ);
             }
@@ -192,7 +210,7 @@ public class ConnectedComponents extends EzPlug implements Block {
     }
 
     @Override
-    public void declareInput(VarList inputMap) {
+    public void declareInput(final VarList inputMap) {
         inputMap.add("input", input.getVariable());
         inputMap.add("method", extractionMethod.getVariable());
         inputMap.add("value", background.getVariable());
@@ -207,7 +225,7 @@ public class ConnectedComponents extends EzPlug implements Block {
     }
 
     @Override
-    public void declareOutput(VarList outputMap) {
+    public void declareOutput(final VarList outputMap) {
         outputMap.add("labeled sequence", outputSequence);
         outputMap.add("objects", outputCCs);
         outputMap.add("list of extracted ROI", outputROIs);
@@ -215,34 +233,34 @@ public class ConnectedComponents extends EzPlug implements Block {
 
     @Override
     protected void execute() {
-        ArrayList<ConnectedComponent> componentsList = new ArrayList<>();
-        Map<Integer, List<ConnectedComponent>> componentsMap;
+        final ArrayList<ConnectedComponent> componentsList = new ArrayList<>();
+        final Map<Integer, List<ConnectedComponent>> componentsMap;
 
-        int min = boundSize.getValue() ? minSize.getValue() : 0;
-        int max = boundSize.getValue() ? maxSize.getValue() : Integer.MAX_VALUE;
+        final int min = boundSize.getValue() ? minSize.getValue() : 0;
+        final int max = boundSize.getValue() ? maxSize.getValue() : Integer.MAX_VALUE;
 
-        Sequence output = new Sequence();
+        final Sequence output = new Sequence();
 
-        Sequence inputSequence = input.getValue(true);
+        final Sequence inputSequence = input.getValue(true);
         if (inputSequence.getSizeT() == 0)
             throw new VarException(input.getVariable(), "Cannot extract connected components from an emtpy sequence !");
 
         // never remove objects touching the Z edge in 2D (that would remove... everything!)
-        boolean discardEdgesAlongZ = (inputSequence.getSizeZ() > 1 && discardEdgesZ.getValue());
+        final boolean discardEdgesAlongZ = (inputSequence.getSizeZ() > 1 && discardEdgesZ.getValue());
 
         try {
             if (extractionMethod.getValue() == ExtractionType.ROI) {
-                int width = inputSequence.getWidth();
-                int height = inputSequence.getHeight();
+                final int width = inputSequence.getWidth();
+                final int height = inputSequence.getHeight();
 
                 //Sequence labeledSequence = new Sequence(inputSequence.getMetadata());
-                Sequence labeledSequence = new Sequence(inputSequence.getOMEXMLMetadata());
+                final Sequence labeledSequence = new Sequence(inputSequence.getOMEXMLMetadata());
                 for (int t = 0; t < inputSequence.getSizeT(); t++)
                     for (int z = 0; z < inputSequence.getSizeZ(); z++)
                         labeledSequence.setImage(t, z, new IcyBufferedImage(width, height, 1, DataType.USHORT));
 
                 short cpt = 1;
-                for (ROI roi : inputSequence.getROIs())
+                for (final ROI roi : inputSequence.getROIs())
                     DataIteratorUtil.set(new SequenceDataIterator(labeledSequence, roi, true), cpt++ & 0xffff);
 
                 componentsMap = extractConnectedComponents(labeledSequence, 0, ExtractionType.BACKGROUND_LABELED,
@@ -254,7 +272,7 @@ public class ConnectedComponents extends EzPlug implements Block {
                         discardEdgesAlongZ, min, max, output);
             }
         }
-        catch (InterruptedException e) {
+        catch (final InterruptedException e) {
             new FailedAnnounceFrame(e.getMessage());
             return;
         }
@@ -262,7 +280,7 @@ public class ConnectedComponents extends EzPlug implements Block {
         outputSequence.setValue(output);
 
         int nbObjects = 0;
-        for (List<ConnectedComponent> ccs : componentsMap.values()) {
+        for (final List<ConnectedComponent> ccs : componentsMap.values()) {
             nbObjects += ccs.size();
             componentsList.addAll(ccs);
         }
@@ -280,58 +298,58 @@ public class ConnectedComponents extends EzPlug implements Block {
         }
 
         if (exportSwPool.getValue()) {
-            DetectionResult result = convertToDetectionResult(componentsMap, input.getValue());
-            SwimmingObject object = new SwimmingObject(result, "Set of " + nbObjects + " connected components");
+            final DetectionResult result = convertToDetectionResult(componentsMap, input.getValue());
+            final SwimmingObject object = new SwimmingObject(result, "Set of " + nbObjects + " connected components");
             Icy.getMainInterface().getSwimmingPool().add(object);
         }
 
         if (exportROI.getValue() || outputROIs.isReferenced()) {
             if (output.getSizeZ() > 1) {
-                ArrayList<ROI3DArea> rois = new ArrayList<>(componentsMap.size());
+                final ArrayList<ROI3DArea> rois = new ArrayList<>(componentsMap.size());
 
                 int ccID = 1;
 
-                for (List<ConnectedComponent> ccs : componentsMap.values())
-                    for (ConnectedComponent cc : ccs) {
-                        ROI3DArea area = new ROI3DArea();
+                for (final List<ConnectedComponent> ccs : componentsMap.values())
+                    for (final ConnectedComponent cc : ccs) {
+                        final ROI3DArea area = new ROI3DArea();
                         area.setName("Object #" + ccID++);
                         area.beginUpdate();
-                        for (Point3i pt : cc)
+                        for (final Point3i pt : cc)
                             area.addPoint(pt.x, pt.y, pt.z);
                         area.setT(cc.getT());
                         area.endUpdate();
                         rois.add(area);
                     }
 
-                outputROIs.setValue(rois.toArray(new ROI3DArea[rois.size()]));
+                outputROIs.setValue(rois.toArray(new ROI3DArea[0]));
             }
             else {
-                ArrayList<ROI2DArea> rois = new ArrayList<>(componentsMap.size());
+                final ArrayList<ROI2DArea> rois = new ArrayList<>(componentsMap.size());
 
-                for (List<ConnectedComponent> ccs : componentsMap.values())
-                    for (ConnectedComponent cc : ccs) {
-                        ROI2DArea area = new ROI2DArea();
+                for (final List<ConnectedComponent> ccs : componentsMap.values())
+                    for (final ConnectedComponent cc : ccs) {
+                        final ROI2DArea area = new ROI2DArea();
                         area.beginUpdate();
-                        for (Point3i pt : cc)
+                        for (final Point3i pt : cc)
                             area.addPoint(pt.x, pt.y);
                         area.setT(cc.getT());
                         area.endUpdate();
                         rois.add(area);
                     }
 
-                outputROIs.setValue(rois.toArray(new ROI2DArea[rois.size()]));
+                outputROIs.setValue(rois.toArray(new ROI2DArea[0]));
             }
 
             if (exportROI.getValue()) {
                 // replace all ROI on the input by the new ones
-                Sequence in = input.getValue();
+                final Sequence in = input.getValue();
 
                 in.beginUpdate();
 
-                for (ROI roi : input.getValue().getROIs())
+                for (final ROI roi : input.getValue().getROIs())
                     in.removeROI(roi);
 
-                for (ROI roi : outputROIs.getValue())
+                for (final ROI roi : outputROIs.getValue())
                     in.addROI(roi);
 
                 in.endUpdate();
@@ -342,7 +360,7 @@ public class ConnectedComponents extends EzPlug implements Block {
             int page = 1;
 
             WritableSheet sheet;
-            WritableWorkbook workbook;
+            final WritableWorkbook workbook;
 
             try {
                 File f = exportExcelFile.getValue(true);
@@ -351,14 +369,14 @@ public class ConnectedComponents extends EzPlug implements Block {
                 workbook = XLSUtil.createWorkbook(f);
                 sheet = XLSUtil.createNewPage(workbook, "Page " + page);
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 throw new IcyHandledException(e.getMessage());
             }
 
-            Sequence s = input.getValue();
-            Point4d resolution = new Point4d(s.getPixelSizeX(), s.getPixelSizeY(), s.getPixelSizeZ(),
+            final Sequence s = input.getValue();
+            final Point4d resolution = new Point4d(s.getPixelSizeX(), s.getPixelSizeY(), s.getPixelSizeZ(),
                     s.getTimeInterval());
-            double voxelSize = resolution.x * resolution.y * resolution.z;
+            final double voxelSize = resolution.x * resolution.y * resolution.z;
             String res = "Sequence resolution:";
             res += " X=" + StringUtil.toStringEx(resolution.x, 5);
             res += ", Y=" + StringUtil.toStringEx(resolution.y, 5);
@@ -397,12 +415,12 @@ public class ConnectedComponents extends EzPlug implements Block {
             XLSUtil.setCellString(sheet, 27, 1, "convex perimeter");
             XLSUtil.setCellString(sheet, 28, 1, "convex volume");
 
-            ConnectedComponentDescriptor shapeDescriptor = new ConnectedComponentDescriptor();
+            final ConnectedComponentDescriptor shapeDescriptor = new ConnectedComponentDescriptor();
             int cpt = 2;
-            for (Integer time : componentsMap.keySet())
-                for (ConnectedComponent cc : componentsMap.get(time)) {
-                    boolean is2D = shapeDescriptor.is2D(cc);
-                    Point3d center = cc.getMassCenter();
+            for (final Integer time : componentsMap.keySet())
+                for (final ConnectedComponent cc : componentsMap.get(time)) {
+                    final boolean is2D = shapeDescriptor.is2D(cc);
+                    final Point3d center = cc.getMassCenter();
                     center.x *= resolution.x;
                     center.y *= resolution.y;
                     center.z *= resolution.z;
@@ -414,13 +432,13 @@ public class ConnectedComponents extends EzPlug implements Block {
                     XLSUtil.setCellNumber(sheet, 5, cpt, shapeDescriptor.computePerimeter(cc, null, null));
                     XLSUtil.setCellNumber(sheet, 6, cpt, cc.getSize() * voxelSize);
                     XLSUtil.setCellNumber(sheet, 7, cpt, shapeDescriptor.computeSphericity(cc));
-                    double[] radiuses = shapeDescriptor.computeEllipseDimensions(cc);
+                    final double[] radiuses = shapeDescriptor.computeEllipseDimensions(cc);
                     XLSUtil.setCellNumber(sheet, 8, cpt, radiuses[0]);
                     XLSUtil.setCellNumber(sheet, 9, cpt, radiuses[1]);
                     XLSUtil.setCellNumber(sheet, 10, cpt, radiuses[2]);
                     XLSUtil.setCellNumber(sheet, 11, cpt, shapeDescriptor.computeEccentricity(cc));
 
-                    double[] contour_area = shapeDescriptor.computeConvexAreaAndVolume(cc);
+                    final double[] contour_area = shapeDescriptor.computeConvexAreaAndVolume(cc);
                     XLSUtil.setCellNumber(sheet, 12, cpt, contour_area[1] == 0.0 ? 0.0 : Math.min(1.0, cc.getSize() / contour_area[1]));
                     XLSUtil.setCellNumber(sheet, 13, cpt, shapeDescriptor.computeGeometricMoment(cc, 1, 0, 0));
                     XLSUtil.setCellNumber(sheet, 14, cpt, shapeDescriptor.computeGeometricMoment(cc, 0, 1, 0));
@@ -469,7 +487,7 @@ public class ConnectedComponents extends EzPlug implements Block {
             try {
                 XLSUtil.saveAndClose(workbook);
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 throw new IcyHandledException(e.getMessage());
             }
         }
@@ -504,10 +522,10 @@ public class ConnectedComponents extends EzPlug implements Block {
          * Creates a new label with the given value. If no parent is set to this label, the given
          * value will be the final one
          *
-         * @param value   the pixel value
-         * @param label   the label value
+         * @param value the pixel value
+         * @param label the label value
          */
-        Label(double value, int label) {
+        Label(final double value, final int label) {
             this.imageValue = value;
             this.targetLabelValue = label;
         }
@@ -532,7 +550,7 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ExtractionType
      * @see ConnectedComponent
      */
-    public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(Sequence inputSequence, Sequence labeledSequence) {
+    public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(final Sequence inputSequence, final Sequence labeledSequence) {
         return extractConnectedComponents(inputSequence, false, 0, Integer.MAX_VALUE, labeledSequence);
     }
 
@@ -550,7 +568,7 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ExtractionType
      * @see ConnectedComponent
      */
-    public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(Sequence inputSequence, int minSize, int maxSize, Sequence labeledSequence) {
+    public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(final Sequence inputSequence, final int minSize, final int maxSize, final Sequence labeledSequence) {
         return extractConnectedComponents(inputSequence, false, minSize, maxSize, labeledSequence);
     }
 
@@ -569,7 +587,7 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ExtractionType
      * @see ConnectedComponent
      */
-    public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(Sequence inputSequence, boolean isInputLabeled, int minSize, int maxSize, Sequence labeledSequence) {
+    public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(final Sequence inputSequence, final boolean isInputLabeled, final int minSize, final int maxSize, final Sequence labeledSequence) {
         return extractConnectedComponents(inputSequence, 0,
                 isInputLabeled ? ExtractionType.BACKGROUND_LABELED : ExtractionType.BACKGROUND, minSize, maxSize,
                 labeledSequence);
@@ -591,7 +609,7 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ExtractionType
      * @see ConnectedComponent
      */
-    public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(Sequence inputSequence, double value, ExtractionType type, int minSize, int maxSize, Sequence labeledSequence) {
+    public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(final Sequence inputSequence, final double value, final ExtractionType type, final int minSize, final int maxSize, final Sequence labeledSequence) {
         return extractConnectedComponents(inputSequence, value, type, false, false, false, minSize, maxSize, labeledSequence);
     }
 
@@ -618,31 +636,31 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ConnectedComponent
      */
     public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(
-            Sequence inputSequence, double value, ExtractionType type, boolean noEdgeX, boolean noEdgeY, boolean noEdgeZ, int minSize, int maxSize, Sequence labeledSequence
+            final Sequence inputSequence, final double value, final ExtractionType type, final boolean noEdgeX, final boolean noEdgeY, final boolean noEdgeZ, final int minSize, final int maxSize, Sequence labeledSequence
     ) {
         if (inputSequence == null || inputSequence.getSizeT() == 0)
             throw new IllegalArgumentException("Cannot extract connected components from an empty sequence !");
 
-        int width = inputSequence.getSizeX();
-        int height = inputSequence.getSizeY();
+        final int width = inputSequence.getSizeX();
+        final int height = inputSequence.getSizeY();
 
         if (labeledSequence == null)
             labeledSequence = new Sequence();
 
-        Map<Integer, List<ConnectedComponent>> componentsMap = new TreeMap<>();
+        final Map<Integer, List<ConnectedComponent>> componentsMap = new TreeMap<>();
 
         for (int t = 0; t < inputSequence.getSizeT(); t++) {
             for (int z = 0; z < inputSequence.getSizeZ(); z++)
                 labeledSequence.setImage(t, z, new IcyBufferedImage(width, height, 1, DataType.UINT));
 
-            VolumetricImage volIN = inputSequence.getVolumetricImage(t);
-            VolumetricImage volOUT = labeledSequence.getVolumetricImage(t);
+            final VolumetricImage volIN = inputSequence.getVolumetricImage(t);
+            final VolumetricImage volOUT = labeledSequence.getVolumetricImage(t);
 
-            List<ConnectedComponent> components = extractConnectedComponents(volIN, value, type, noEdgeX, noEdgeY,
+            final List<ConnectedComponent> components = extractConnectedComponents(volIN, value, type, noEdgeX, noEdgeY,
                     noEdgeZ, minSize, maxSize, volOUT);
 
             // int cpt=1;
-            for (ConnectedComponent cc : components) {
+            for (final ConnectedComponent cc : components) {
                 cc.setT(t);
                 // System.out.println(t + "\t" + cpt++ + "\t" + (int)cc.getMassCenter().x + "\t" +
                 // (int)cc.getMassCenter().y);
@@ -679,7 +697,7 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ConnectedComponent
      */
     public static List<ConnectedComponent> extractConnectedComponents(
-            VolumetricImage stack, double value, ExtractionType type, boolean noEdgeX, boolean noEdgeY, boolean noEdgeZ, int minSize, int maxSize
+            final VolumetricImage stack, final double value, final ExtractionType type, final boolean noEdgeX, final boolean noEdgeY, final boolean noEdgeZ, final int minSize, final int maxSize
     ) {
         return extractConnectedComponents(stack, value, type, noEdgeX, noEdgeY, noEdgeZ, minSize, maxSize, new VolumetricImage());
     }
@@ -710,18 +728,18 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ConnectedComponent
      */
     public static List<ConnectedComponent> extractConnectedComponents(
-            VolumetricImage stack, double value, ExtractionType type, boolean noEdgeX, boolean noEdgeY, boolean noEdgeZ, int minSize, int maxSize, final VolumetricImage labeledStack
+            final VolumetricImage stack, final double value, final ExtractionType type, final boolean noEdgeX, final boolean noEdgeY, final boolean noEdgeZ, final int minSize, final int maxSize, final VolumetricImage labeledStack
     ) throws NullPointerException {
-        int width = stack.getFirstImage().getSizeX();
-        int height = stack.getFirstImage().getSizeY();
-        int depth = stack.getSize();
+        final int width = stack.getFirstImage().getSizeX();
+        final int height = stack.getFirstImage().getSizeY();
+        final int depth = stack.getSize();
 
-        int[] neighborLabelValues = new int[13];
+        final int[] neighborLabelValues = new int[13];
         int neighborhoodSize = 0;
 
-        boolean extractUserValue = (type == ExtractionType.VALUE);
+        final boolean extractUserValue = (type == ExtractionType.VALUE);
 
-        Label[] labels = new Label[width * height * depth];
+        final Label[] labels = new Label[width * height * depth];
 
         // first image pass: naive labeling with simple backward neighborhood
 
@@ -736,14 +754,14 @@ public class ConnectedComponents extends EzPlug implements Block {
 
             final IcyBufferedImage currentSliceImage = labeledStack.getImage(z);
             // retrieve the direct pointer to the current slice
-            int[] _labelsInCurrentSlice = currentSliceImage.getDataXYAsInt(0);
+            final int[] _labelsInCurrentSlice = currentSliceImage.getDataXYAsInt(0);
             // retrieve a direct pointer to the previous slice
-            int[] _labelsInUpperSlice = (z == 0) ? null : labeledStack.getImage(z - 1).getDataXYAsInt(0);
+            final int[] _labelsInUpperSlice = (z == 0) ? null : labeledStack.getImage(z - 1).getDataXYAsInt(0);
 
             int voxelOffset = 0;
 
-            Object inputData = stack.getImage(z).getDataXY(0);
-            DataType dataType = stack.getImage(z).getDataType_();
+            final Object inputData = stack.getImage(z).getDataXY(0);
+            final DataType dataType = stack.getImage(z).getDataType_();
 
             for (int y = 0; y < height; y++) {
                 onEdgeY = (y == 0 || y == height - 1);
@@ -751,9 +769,9 @@ public class ConnectedComponents extends EzPlug implements Block {
                 for (int x = 0; x < width; x++, voxelOffset++) {
                     onEdgeX = (x == 0 || x == width - 1);
 
-                    double pixelValue = Array1DUtil.getValue(inputData, voxelOffset, dataType);
+                    final double pixelValue = Array1DUtil.getValue(inputData, voxelOffset, dataType);
 
-                    boolean pixelEqualsUserValue = (pixelValue == value);
+                    final boolean pixelEqualsUserValue = (pixelValue == value);
 
                     // do not process the current pixel if:
                     // - extractUserValue is true and pixelEqualsUserValue is false
@@ -794,7 +812,7 @@ public class ConnectedComponents extends EzPlug implements Block {
                             }
                         }
                         else {
-                            int north = voxelOffset - width;
+                            final int north = voxelOffset - width;
 
                             if (x == 0) {
                                 // e n n
@@ -830,7 +848,7 @@ public class ConnectedComponents extends EzPlug implements Block {
                     }
                     else {
                         if (y == 0) {
-                            int south = voxelOffset + width;
+                            final int south = voxelOffset + width;
 
                             if (x == 0) {
                                 // e e e | e e e
@@ -871,7 +889,7 @@ public class ConnectedComponents extends EzPlug implements Block {
                             }
                         }
                         else if (y == height - 1) {
-                            int north = voxelOffset - width;
+                            final int north = voxelOffset - width;
 
                             if (x == 0) {
                                 // e n n | e n n
@@ -919,8 +937,8 @@ public class ConnectedComponents extends EzPlug implements Block {
                             }
                         }
                         else {
-                            int north = voxelOffset - width;
-                            int south = voxelOffset + width;
+                            final int north = voxelOffset - width;
+                            final int south = voxelOffset + width;
 
                             if (x == 0) {
                                 // e n n | e n n
@@ -938,8 +956,8 @@ public class ConnectedComponents extends EzPlug implements Block {
                                 neighborhoodSize = 8;
                             }
                             else if (x == width - 1) {
-                                int northwest = north - 1;
-                                int west = voxelOffset - 1;
+                                final int northwest = north - 1;
+                                final int west = voxelOffset - 1;
 
                                 // n n e | n n e
                                 // n n e | n x e
@@ -957,11 +975,11 @@ public class ConnectedComponents extends EzPlug implements Block {
                                 neighborhoodSize = 9;
                             }
                             else {
-                                int northwest = north - 1;
-                                int west = voxelOffset - 1;
-                                int northeast = north + 1;
-                                int southwest = south - 1;
-                                int southeast = south + 1;
+                                final int northwest = north - 1;
+                                final int west = voxelOffset - 1;
+                                final int northeast = north + 1;
+                                final int southwest = south - 1;
+                                final int southeast = south + 1;
 
                                 // n n n | n n n
                                 // n n n | n x .
@@ -994,7 +1012,7 @@ public class ConnectedComponents extends EzPlug implements Block {
                     // and assign that minimum label right now
 
                     for (int i = 0; i < neighborhoodSize; i++) {
-                        int neighborLabelValue = neighborLabelValues[i];
+                        final int neighborLabelValue = neighborLabelValues[i];
 
                         // zero labels are not interesting...
                         if (neighborLabelValue == 0)
@@ -1027,19 +1045,19 @@ public class ConnectedComponents extends EzPlug implements Block {
                         // -> change their value to currentVoxelLabelValue
                         // -> change their target to currentVoxelLabel
 
-                        Label currentVoxelLabel = labels[currentVoxelLabelValue];
+                        final Label currentVoxelLabel = labels[currentVoxelLabelValue];
 
                         for (int i = 0; i < neighborhoodSize; i++) {
-                            int neighborLabelValue = neighborLabelValues[i];
+                            final int neighborLabelValue = neighborLabelValues[i];
 
                             if (neighborLabelValue > currentVoxelLabelValue) {
-                                Label label = labels[neighborLabelValue];
+                                final Label label = labels[neighborLabelValue];
 
                                 if (type == ExtractionType.BACKGROUND_LABELED && label.imageValue != pixelValue)
                                     continue;
 
-                                int finalLabelValue = label.getFinalLabelValue();
-                                Label finalLabel = labels[finalLabelValue];
+                                final int finalLabelValue = label.getFinalLabelValue();
+                                final Label finalLabel = labels[finalLabelValue];
 
                                 if (currentVoxelLabel.targetLabelValue == finalLabelValue)
                                     continue;
@@ -1072,7 +1090,7 @@ public class ConnectedComponents extends EzPlug implements Block {
         // end of the first pass, all pixels have a label
         // (though might not be unique within a given component)
 
-        HashMap<Integer, ConnectedComponent> componentsMap = new HashMap<>();
+        final HashMap<Integer, ConnectedComponent> componentsMap = new HashMap<>();
 
         // fusion strategy: fuse higher labels with lower ones
         // "highestKnownLabel" holds the highest known label
@@ -1081,14 +1099,14 @@ public class ConnectedComponents extends EzPlug implements Block {
         int finalLabel = 0;
 
         for (int labelValue = highestKnownLabel; labelValue > 0; labelValue--) {
-            Label label = labels[labelValue];
+            final Label label = labels[labelValue];
 
-            int targetLabelValue = label.targetLabelValue;
+            final int targetLabelValue = label.targetLabelValue;
 
             if (targetLabelValue < labelValue) {
                 // label should be fused to targetLabel
 
-                Label targetLabel = labels[targetLabelValue];
+                final Label targetLabel = labels[targetLabelValue];
 
                 // -> add label's size to targetLabel
                 targetLabel.size += label.size;
@@ -1126,7 +1144,7 @@ public class ConnectedComponents extends EzPlug implements Block {
 
                     // -> add this label to the list of valid labels
 
-                    ConnectedComponent component = new ConnectedComponent(label.size);
+                    final ConnectedComponent component = new ConnectedComponent(label.size);
                     component.onEdgeX = label.onEdgeX;
                     component.onEdgeY = label.onEdgeY;
                     component.onEdgeZ = label.onEdgeZ;
@@ -1139,7 +1157,7 @@ public class ConnectedComponents extends EzPlug implements Block {
 
         for (int z = 0; z < depth; z++) {
             final IcyBufferedImage sliceImage = labeledStack.getImage(z);
-            int[] _outputSlice = sliceImage.getDataXYAsInt(0);
+            final int[] _outputSlice = sliceImage.getDataXYAsInt(0);
 
             int pixelOffset = 0;
 
@@ -1171,13 +1189,13 @@ public class ConnectedComponents extends EzPlug implements Block {
         return new ArrayList<>(componentsMap.values());
     }
 
-    public static DetectionResult convertToDetectionResult(Map<Integer, List<ConnectedComponent>> detections, Sequence sequence) {
+    public static DetectionResult convertToDetectionResult(final Map<Integer, List<ConnectedComponent>> detections, final Sequence sequence) {
 
-        DetectionResult detectionResult = new DetectionResult();
-        for (Integer t : detections.keySet())
-            for (ConnectedComponent cc : detections.get(t)) {
+        final DetectionResult detectionResult = new DetectionResult();
+        for (final Integer t : detections.keySet())
+            for (final ConnectedComponent cc : detections.get(t)) {
                 // TODO: add points information
-                Spot spot = new Spot(cc.getMassCenter().x, cc.getMassCenter().y, cc.getMassCenter().z);
+                final Spot spot = new Spot(cc.getMassCenter().x, cc.getMassCenter().y, cc.getMassCenter().z);
                 detectionResult.addDetection(t, spot);
             }
 
@@ -1194,37 +1212,38 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @param components Map of List of ConnectedComponent
      * @param comparator Comparator of ConnectedComponents
      */
-    public static void createLabeledSequence(Sequence output, Map<Integer, List<ConnectedComponent>> components, Comparator<ConnectedComponent> comparator) {
+    public static void createLabeledSequence(final Sequence output, final Map<Integer, List<ConnectedComponent>> components, final Comparator<ConnectedComponent> comparator) {
         if (comparator == null)
             return;
 
-        int width = output.getSizeX();
-        int[] ids = new int[output.getSizeC()];
+        final int width = output.getSizeX();
+        final int[] ids = new int[output.getSizeC()];
         Arrays.fill(ids, 1);
 
-        for (Integer t : components.keySet()) {
+        for (final Integer t : components.keySet()) {
             for (int c = 0; c < output.getSizeC(); c++) {
                 // retrieve all objects in that channel
-                ArrayList<ConnectedComponent> cComponents = new ArrayList<>();
-                for (ConnectedComponent cc : components.get(t)) {
+                final ArrayList<ConnectedComponent> cComponents = new ArrayList<>();
+                for (final ConnectedComponent cc : components.get(t)) {
                     if (cc.getC() == -1 || cc.getC() == c)
                         cComponents.add(cc);
                 }
 
-                ConnectedComponent[] ccs = cComponents.toArray(new ConnectedComponent[cComponents.size()]);
+                final ConnectedComponent[] ccs = cComponents.toArray(new ConnectedComponent[0]);
                 Arrays.sort(ccs, comparator);
 
                 final boolean outputVolatile = output.isVolatile();
                 try {
-                    int[][] data = output.getDataXYZAsInt(t, c);
+                    final int[][] data = output.getDataXYZAsInt(t, c);
 
-                    for (ConnectedComponent cc : ccs) {
-                        for (Point3i pt : cc) {
+                    for (final ConnectedComponent cc : ccs) {
+                        for (final Point3i pt : cc) {
                             data[pt.z][pt.y * width + pt.x] = ids[c];
                         }
                         ids[c]++;
                     }
-                } finally {
+                }
+                finally {
                     // restore back volatile state
                     output.setVolatile(outputVolatile);
                 }
