@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -20,11 +20,11 @@ package plugins.adufour.connectedcomponents;
 
 import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
-import icy.image.IcyBufferedImage;
-import icy.plugin.abstract_.Plugin;
-import icy.plugin.interface_.PluginBundled;
-import icy.sequence.Sequence;
-import icy.type.DataType;
+import org.bioimageanalysis.icy.common.type.DataType;
+import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
+import org.bioimageanalysis.icy.extension.plugin.interface_.PluginBundled;
+import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
+import org.bioimageanalysis.icy.model.sequence.Sequence;
 import plugins.adufour.blocks.lang.Block;
 import plugins.adufour.blocks.util.VarList;
 import plugins.adufour.quickhull.QuickHull2D;
@@ -389,7 +389,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
             // volume = sum( sqrt[ (x[i] - x[i-1])^2 + (y[i] - y[i-1])^2 ] )
             // area = 0.5 * sum( (x[i-1] * y[i]) - (y[i-1] * x[i]) )
 
-            Point2D p1 = points.get(points.size() - 1), p2;
+            Point2D p1 = points.getLast(), p2;
 
             for (i = 0; i < points.size(); i++) {
                 p2 = points.get(i);

@@ -7,13 +7,11 @@
     <parent>
         <groupId>org.bioimageanalysis.icy</groupId>
         <artifactId>pom-icy</artifactId>
-        <version>2.2.0</version>
+        <version>3.0.0-a.1</version>
     </parent>
 
     <artifactId>connected-components</artifactId>
-    <version>5.0.0</version>
-
-    <packaging>jar</packaging>
+    <version>5.0.0-a.1</version>
 
     <name>ConnectedComponents</name>
     <description>
@@ -48,17 +46,12 @@
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>jama</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>net.sourceforge.jexcelapi</groupId>
-            <artifactId>jxl</artifactId>
-        </dependency>
     </dependencies>
 
     <repositories>
         <repository>
             <id>icy</id>
-            <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
+            <url>https://nexus-icy.pasteur.cloud/repository/icy/</url>
         </repository>
     </repositories>
 

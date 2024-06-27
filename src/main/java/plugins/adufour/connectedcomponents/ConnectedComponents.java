@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,56 +18,47 @@
 
 package plugins.adufour.connectedcomponents;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3i;
-import javax.vecmath.Point4d;
-
-import icy.file.FileUtil;
-import icy.gui.frame.progress.FailedAnnounceFrame;
-import icy.image.IcyBufferedImage;
-import icy.image.colormap.FireColorMap;
-import icy.main.Icy;
-import icy.roi.ROI;
-import icy.sequence.Sequence;
-import icy.sequence.SequenceDataIterator;
-import icy.sequence.VolumetricImage;
-import icy.swimmingPool.SwimmingObject;
-import icy.system.IcyHandledException;
-import icy.type.DataIteratorUtil;
-import icy.type.DataType;
-import icy.type.collection.array.Array1DUtil;
-import icy.util.StringUtil;
-import icy.util.XLSUtil;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.bioimageanalysis.extension.kernel.roi.roi2d.ROI2DArea;
+import org.bioimageanalysis.extension.kernel.roi.roi3d.ROI3DArea;
+import org.bioimageanalysis.icy.Icy;
+import org.bioimageanalysis.icy.common.collection.array.Array1DUtil;
+import org.bioimageanalysis.icy.common.string.StringUtil;
+import org.bioimageanalysis.icy.common.type.DataIteratorUtil;
+import org.bioimageanalysis.icy.common.type.DataType;
+import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginIcon;
+import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginName;
+import org.bioimageanalysis.icy.gui.frame.progress.FailedAnnounceFrame;
+import org.bioimageanalysis.icy.io.FileUtil;
+import org.bioimageanalysis.icy.io.xls.XLSXUtil;
+import org.bioimageanalysis.icy.model.colormap.FireColorMap;
+import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
+import org.bioimageanalysis.icy.model.roi.ROI;
+import org.bioimageanalysis.icy.model.sequence.Sequence;
+import org.bioimageanalysis.icy.model.sequence.SequenceDataIterator;
+import org.bioimageanalysis.icy.model.sequence.VolumetricImage;
+import org.bioimageanalysis.icy.model.swimmingPool.SwimmingObject;
+import org.bioimageanalysis.icy.system.IcyHandledException;
 import plugins.adufour.blocks.lang.Block;
 import plugins.adufour.blocks.util.VarList;
-import plugins.adufour.ezplug.EzGroup;
-import plugins.adufour.ezplug.EzLabel;
-import plugins.adufour.ezplug.EzPlug;
-import plugins.adufour.ezplug.EzVarBoolean;
-import plugins.adufour.ezplug.EzVarEnum;
-import plugins.adufour.ezplug.EzVarFile;
-import plugins.adufour.ezplug.EzVarInteger;
-import plugins.adufour.ezplug.EzVarSequence;
+import plugins.adufour.ezplug.*;
 import plugins.adufour.vars.lang.VarGenericArray;
 import plugins.adufour.vars.lang.VarROIArray;
 import plugins.adufour.vars.lang.VarSequence;
 import plugins.adufour.vars.util.VarException;
-import plugins.kernel.roi.roi2d.ROI2DArea;
-import plugins.kernel.roi.roi3d.ROI3DArea;
 import plugins.nchenouard.spot.DetectionResult;
 import plugins.nchenouard.spot.Spot;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Point3i;
+import javax.vecmath.Point4d;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+@IcyPluginName("Connected Components")
+@IcyPluginIcon(path = "/icon/Connected_Components.png")
 public class ConnectedComponents extends EzPlug implements Block {
     /**
      * List of extraction methods suitable for the Connected Components plugin
@@ -359,17 +350,18 @@ public class ConnectedComponents extends EzPlug implements Block {
         if (exportExcel.getValue()) {
             int page = 1;
 
-            WritableSheet sheet;
-            final WritableWorkbook workbook;
+            Sheet sheet;
+            final Workbook workbook;
+
+            File f = exportExcelFile.getValue(true);
+            if (!FileUtil.getFileExtension(f.getPath(), false).equalsIgnoreCase("xlsx"))
+                f = new File(f.getPath() + ".xlsx");
 
             try {
-                File f = exportExcelFile.getValue(true);
-                if (!FileUtil.getFileExtension(f.getPath(), false).equalsIgnoreCase("xls"))
-                    f = new File(f.getPath() + ".xls");
-                workbook = XLSUtil.createWorkbook(f);
-                sheet = XLSUtil.createNewPage(workbook, "Page " + page);
+                workbook = XLSXUtil.createWorkbook();
+                sheet = XLSXUtil.createNewPage(workbook, "Page " + page);
             }
-            catch (final Exception e) {
+            catch (final IOException e) {
                 throw new IcyHandledException(e.getMessage());
             }
 
@@ -383,37 +375,37 @@ public class ConnectedComponents extends EzPlug implements Block {
             res += ", Z=" + StringUtil.toStringEx(resolution.z, 5);
             res += ", T=" + StringUtil.toStringEx(resolution.w, 5);
 
-            XLSUtil.setCellString(sheet, 0, 0, s.getName());
-            XLSUtil.setCellString(sheet, 6, 0, res);
-            XLSUtil.setCellString(sheet, 0, 1, "#");
-            XLSUtil.setCellString(sheet, 1, 1, "t");
-            XLSUtil.setCellString(sheet, 2, 1, "x");
-            XLSUtil.setCellString(sheet, 3, 1, "y");
-            XLSUtil.setCellString(sheet, 4, 1, "z");
-            XLSUtil.setCellString(sheet, 5, 1, "perimeter");
-            XLSUtil.setCellString(sheet, 6, 1, "area");
-            XLSUtil.setCellString(sheet, 7, 1, "sphericity");
-            XLSUtil.setCellString(sheet, 8, 1, "major axis");
-            XLSUtil.setCellString(sheet, 9, 1, "minor axis");
-            XLSUtil.setCellString(sheet, 10, 1, "minor Z axis");
-            XLSUtil.setCellString(sheet, 11, 1, "eccentricity");
-            XLSUtil.setCellString(sheet, 12, 1, "hull fill ratio");
-            XLSUtil.setCellString(sheet, 13, 1, "M100");
-            XLSUtil.setCellString(sheet, 14, 1, "M010");
-            XLSUtil.setCellString(sheet, 15, 1, "M001");
-            XLSUtil.setCellString(sheet, 16, 1, "M110");
-            XLSUtil.setCellString(sheet, 17, 1, "M101");
-            XLSUtil.setCellString(sheet, 18, 1, "M011");
-            XLSUtil.setCellString(sheet, 19, 1, "M111");
-            XLSUtil.setCellString(sheet, 20, 1, "M200");
-            XLSUtil.setCellString(sheet, 21, 1, "M020");
-            XLSUtil.setCellString(sheet, 22, 1, "M002");
-            XLSUtil.setCellString(sheet, 23, 1, "M220");
-            XLSUtil.setCellString(sheet, 24, 1, "M202");
-            XLSUtil.setCellString(sheet, 25, 1, "M022");
-            XLSUtil.setCellString(sheet, 26, 1, "M222");
-            XLSUtil.setCellString(sheet, 27, 1, "convex perimeter");
-            XLSUtil.setCellString(sheet, 28, 1, "convex volume");
+            XLSXUtil.setCellString(sheet, 0, 0, s.getName());
+            XLSXUtil.setCellString(sheet, 6, 0, res);
+            XLSXUtil.setCellString(sheet, 0, 1, "#");
+            XLSXUtil.setCellString(sheet, 1, 1, "t");
+            XLSXUtil.setCellString(sheet, 2, 1, "x");
+            XLSXUtil.setCellString(sheet, 3, 1, "y");
+            XLSXUtil.setCellString(sheet, 4, 1, "z");
+            XLSXUtil.setCellString(sheet, 5, 1, "perimeter");
+            XLSXUtil.setCellString(sheet, 6, 1, "area");
+            XLSXUtil.setCellString(sheet, 7, 1, "sphericity");
+            XLSXUtil.setCellString(sheet, 8, 1, "major axis");
+            XLSXUtil.setCellString(sheet, 9, 1, "minor axis");
+            XLSXUtil.setCellString(sheet, 10, 1, "minor Z axis");
+            XLSXUtil.setCellString(sheet, 11, 1, "eccentricity");
+            XLSXUtil.setCellString(sheet, 12, 1, "hull fill ratio");
+            XLSXUtil.setCellString(sheet, 13, 1, "M100");
+            XLSXUtil.setCellString(sheet, 14, 1, "M010");
+            XLSXUtil.setCellString(sheet, 15, 1, "M001");
+            XLSXUtil.setCellString(sheet, 16, 1, "M110");
+            XLSXUtil.setCellString(sheet, 17, 1, "M101");
+            XLSXUtil.setCellString(sheet, 18, 1, "M011");
+            XLSXUtil.setCellString(sheet, 19, 1, "M111");
+            XLSXUtil.setCellString(sheet, 20, 1, "M200");
+            XLSXUtil.setCellString(sheet, 21, 1, "M020");
+            XLSXUtil.setCellString(sheet, 22, 1, "M002");
+            XLSXUtil.setCellString(sheet, 23, 1, "M220");
+            XLSXUtil.setCellString(sheet, 24, 1, "M202");
+            XLSXUtil.setCellString(sheet, 25, 1, "M022");
+            XLSXUtil.setCellString(sheet, 26, 1, "M222");
+            XLSXUtil.setCellString(sheet, 27, 1, "convex perimeter");
+            XLSXUtil.setCellString(sheet, 28, 1, "convex volume");
 
             final ConnectedComponentDescriptor shapeDescriptor = new ConnectedComponentDescriptor();
             int cpt = 2;
@@ -424,68 +416,68 @@ public class ConnectedComponents extends EzPlug implements Block {
                     center.x *= resolution.x;
                     center.y *= resolution.y;
                     center.z *= resolution.z;
-                    XLSUtil.setCellNumber(sheet, 0, cpt, cpt - 1);
-                    XLSUtil.setCellNumber(sheet, 1, cpt, time * resolution.w);
-                    XLSUtil.setCellNumber(sheet, 2, cpt, center.x);
-                    XLSUtil.setCellNumber(sheet, 3, cpt, center.y);
-                    XLSUtil.setCellNumber(sheet, 4, cpt, center.z);
-                    XLSUtil.setCellNumber(sheet, 5, cpt, shapeDescriptor.computePerimeter(cc, null, null));
-                    XLSUtil.setCellNumber(sheet, 6, cpt, cc.getSize() * voxelSize);
-                    XLSUtil.setCellNumber(sheet, 7, cpt, shapeDescriptor.computeSphericity(cc));
+                    XLSXUtil.setCellNumber(sheet, 0, cpt, (double) (cpt - 1));
+                    XLSXUtil.setCellNumber(sheet, 1, cpt, time * resolution.w);
+                    XLSXUtil.setCellNumber(sheet, 2, cpt, center.x);
+                    XLSXUtil.setCellNumber(sheet, 3, cpt, center.y);
+                    XLSXUtil.setCellNumber(sheet, 4, cpt, center.z);
+                    XLSXUtil.setCellNumber(sheet, 5, cpt, shapeDescriptor.computePerimeter(cc, null, null));
+                    XLSXUtil.setCellNumber(sheet, 6, cpt, cc.getSize() * voxelSize);
+                    XLSXUtil.setCellNumber(sheet, 7, cpt, shapeDescriptor.computeSphericity(cc));
                     final double[] radiuses = shapeDescriptor.computeEllipseDimensions(cc);
-                    XLSUtil.setCellNumber(sheet, 8, cpt, radiuses[0]);
-                    XLSUtil.setCellNumber(sheet, 9, cpt, radiuses[1]);
-                    XLSUtil.setCellNumber(sheet, 10, cpt, radiuses[2]);
-                    XLSUtil.setCellNumber(sheet, 11, cpt, shapeDescriptor.computeEccentricity(cc));
+                    XLSXUtil.setCellNumber(sheet, 8, cpt, radiuses[0]);
+                    XLSXUtil.setCellNumber(sheet, 9, cpt, radiuses[1]);
+                    XLSXUtil.setCellNumber(sheet, 10, cpt, radiuses[2]);
+                    XLSXUtil.setCellNumber(sheet, 11, cpt, shapeDescriptor.computeEccentricity(cc));
 
                     final double[] contour_area = shapeDescriptor.computeConvexAreaAndVolume(cc);
-                    XLSUtil.setCellNumber(sheet, 12, cpt, contour_area[1] == 0.0 ? 0.0 : Math.min(1.0, cc.getSize() / contour_area[1]));
-                    XLSUtil.setCellNumber(sheet, 13, cpt, shapeDescriptor.computeGeometricMoment(cc, 1, 0, 0));
-                    XLSUtil.setCellNumber(sheet, 14, cpt, shapeDescriptor.computeGeometricMoment(cc, 0, 1, 0));
+                    XLSXUtil.setCellNumber(sheet, 12, cpt, contour_area[1] == 0.0 ? 0.0 : Math.min(1.0, cc.getSize() / contour_area[1]));
+                    XLSXUtil.setCellNumber(sheet, 13, cpt, shapeDescriptor.computeGeometricMoment(cc, 1, 0, 0));
+                    XLSXUtil.setCellNumber(sheet, 14, cpt, shapeDescriptor.computeGeometricMoment(cc, 0, 1, 0));
 
                     if (!is2D)
-                        XLSUtil.setCellNumber(sheet, 15, cpt, shapeDescriptor.computeGeometricMoment(cc, 0, 0, 1));
+                        XLSXUtil.setCellNumber(sheet, 15, cpt, shapeDescriptor.computeGeometricMoment(cc, 0, 0, 1));
 
-                    XLSUtil.setCellNumber(sheet, 16, cpt, shapeDescriptor.computeGeometricMoment(cc, 1, 1, 0));
-
-                    if (!is2D)
-                        XLSUtil.setCellNumber(sheet, 17, cpt, shapeDescriptor.computeGeometricMoment(cc, 1, 0, 1));
+                    XLSXUtil.setCellNumber(sheet, 16, cpt, shapeDescriptor.computeGeometricMoment(cc, 1, 1, 0));
 
                     if (!is2D)
-                        XLSUtil.setCellNumber(sheet, 18, cpt, shapeDescriptor.computeGeometricMoment(cc, 0, 1, 1));
+                        XLSXUtil.setCellNumber(sheet, 17, cpt, shapeDescriptor.computeGeometricMoment(cc, 1, 0, 1));
 
                     if (!is2D)
-                        XLSUtil.setCellNumber(sheet, 19, cpt, shapeDescriptor.computeGeometricMoment(cc, 1, 1, 1));
-
-                    XLSUtil.setCellNumber(sheet, 20, cpt, shapeDescriptor.computeGeometricMoment(cc, 2, 0, 0));
-                    XLSUtil.setCellNumber(sheet, 21, cpt, shapeDescriptor.computeGeometricMoment(cc, 0, 2, 0));
+                        XLSXUtil.setCellNumber(sheet, 18, cpt, shapeDescriptor.computeGeometricMoment(cc, 0, 1, 1));
 
                     if (!is2D)
-                        XLSUtil.setCellNumber(sheet, 22, cpt, shapeDescriptor.computeGeometricMoment(cc, 0, 0, 2));
+                        XLSXUtil.setCellNumber(sheet, 19, cpt, shapeDescriptor.computeGeometricMoment(cc, 1, 1, 1));
 
-                    XLSUtil.setCellNumber(sheet, 23, cpt, shapeDescriptor.computeGeometricMoment(cc, 2, 2, 0));
-
-                    if (!is2D)
-                        XLSUtil.setCellNumber(sheet, 24, cpt, shapeDescriptor.computeGeometricMoment(cc, 2, 0, 2));
+                    XLSXUtil.setCellNumber(sheet, 20, cpt, shapeDescriptor.computeGeometricMoment(cc, 2, 0, 0));
+                    XLSXUtil.setCellNumber(sheet, 21, cpt, shapeDescriptor.computeGeometricMoment(cc, 0, 2, 0));
 
                     if (!is2D)
-                        XLSUtil.setCellNumber(sheet, 25, cpt, shapeDescriptor.computeGeometricMoment(cc, 0, 2, 2));
+                        XLSXUtil.setCellNumber(sheet, 22, cpt, shapeDescriptor.computeGeometricMoment(cc, 0, 0, 2));
+
+                    XLSXUtil.setCellNumber(sheet, 23, cpt, shapeDescriptor.computeGeometricMoment(cc, 2, 2, 0));
 
                     if (!is2D)
-                        XLSUtil.setCellNumber(sheet, 26, cpt, shapeDescriptor.computeGeometricMoment(cc, 2, 2, 2));
+                        XLSXUtil.setCellNumber(sheet, 24, cpt, shapeDescriptor.computeGeometricMoment(cc, 2, 0, 2));
 
-                    XLSUtil.setCellNumber(sheet, 27, cpt, contour_area[0]);
-                    XLSUtil.setCellNumber(sheet, 28, cpt, contour_area[1]);
+                    if (!is2D)
+                        XLSXUtil.setCellNumber(sheet, 25, cpt, shapeDescriptor.computeGeometricMoment(cc, 0, 2, 2));
+
+                    if (!is2D)
+                        XLSXUtil.setCellNumber(sheet, 26, cpt, shapeDescriptor.computeGeometricMoment(cc, 2, 2, 2));
+
+                    XLSXUtil.setCellNumber(sheet, 27, cpt, contour_area[0]);
+                    XLSXUtil.setCellNumber(sheet, 28, cpt, contour_area[1]);
                     cpt++;
                     if (cpt == Short.MAX_VALUE) {
                         page++;
-                        sheet = XLSUtil.createNewPage(workbook, "Page " + page);
+                        sheet = XLSXUtil.createNewPage(workbook, "Page " + page);
                         cpt = 1;
                     }
                 }
 
             try {
-                XLSUtil.saveAndClose(workbook);
+                XLSXUtil.saveAndClose(workbook, f);
             }
             catch (final Exception e) {
                 throw new IcyHandledException(e.getMessage());
@@ -761,7 +753,7 @@ public class ConnectedComponents extends EzPlug implements Block {
             int voxelOffset = 0;
 
             final Object inputData = stack.getImage(z).getDataXY(0);
-            final DataType dataType = stack.getImage(z).getDataType_();
+            final DataType dataType = stack.getImage(z).getDataType();
 
             for (int y = 0; y < height; y++) {
                 onEdgeY = (y == 0 || y == height - 1);

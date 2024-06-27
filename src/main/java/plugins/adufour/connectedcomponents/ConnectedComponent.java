@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,15 +18,17 @@
 
 package plugins.adufour.connectedcomponents;
 
-import icy.image.IcyBufferedImage;
-import icy.roi.ROI;
-import icy.sequence.Sequence;
-import icy.sequence.SequenceDataIterator;
-import icy.type.DataIteratorUtil;
-import icy.type.DataType;
-import icy.type.collection.array.Array1DUtil;
-import plugins.kernel.roi.roi2d.ROI2DArea;
-import plugins.kernel.roi.roi3d.ROI3DArea;
+
+import org.bioimageanalysis.extension.kernel.roi.roi2d.ROI2DArea;
+import org.bioimageanalysis.extension.kernel.roi.roi3d.ROI3DArea;
+import org.bioimageanalysis.icy.common.collection.array.Array1DUtil;
+import org.bioimageanalysis.icy.common.type.DataIteratorUtil;
+import org.bioimageanalysis.icy.common.type.DataType;
+import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
+import org.bioimageanalysis.icy.model.roi.ROI;
+import org.bioimageanalysis.icy.model.sequence.Sequence;
+import org.bioimageanalysis.icy.model.sequence.SequenceDataIterator;
+import org.jetbrains.annotations.NotNull;
 import plugins.nchenouard.spot.Detection;
 
 import javax.vecmath.Point3d;
@@ -182,7 +184,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i> {
 
             for (int c = 0; c < intensitySum.length; c++)
                 intensitySum[c] += Array1DUtil.getValue(((Object[]) dataCXY)[c], offsetXY,
-                        sequence.getDataType_().isSigned());
+                        sequence.getDataType().isSigned());
         }
 
         for (int i = 0; i < intensitySum.length; i++)
@@ -220,7 +222,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i> {
 
             for (int c = 0; c < minIntensity.length; c++) {
                 final double val = Array1DUtil.getValue(((Object[]) dataCXY)[c], offsetXY,
-                        sequence.getDataType_().isSigned());
+                        sequence.getDataType().isSigned());
                 if (val < minIntensity[c])
                     minIntensity[c] = val;
             }
@@ -257,7 +259,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i> {
 
             for (int c = 0; c < maxIntensity.length; c++) {
                 final double val = Array1DUtil.getValue(((Object[]) dataCXY)[c], offsetXY,
-                        sequence.getDataType_().isSigned());
+                        sequence.getDataType().isSigned());
                 if (val > maxIntensity[c])
                     maxIntensity[c] = val;
             }
@@ -568,7 +570,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i> {
     }
 
     @Override
-    public Iterator<Point3i> iterator() {
+    public @NotNull Iterator<Point3i> iterator() {
         return points.iterator();
     }
 
