@@ -7,11 +7,11 @@
     <parent>
         <groupId>org.bioimageanalysis.icy</groupId>
         <artifactId>pom-icy</artifactId>
-        <version>3.0.0-a.1</version>
+        <version>3.0.0-a.3</version>
     </parent>
 
     <artifactId>connected-components</artifactId>
-    <version>5.0.0-a.1</version>
+    <version>5.0.0-a.2</version>
 
     <name>ConnectedComponents</name>
     <description>
@@ -47,12 +47,4 @@
             <artifactId>jama</artifactId>
         </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>icy</id>
-            <url>https://nexus-icy.pasteur.cloud/repository/icy/</url>
-        </repository>
-    </repositories>
-
 </project>

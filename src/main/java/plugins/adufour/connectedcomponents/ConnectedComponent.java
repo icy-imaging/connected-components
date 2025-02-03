@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -17,7 +17,6 @@
  */
 
 package plugins.adufour.connectedcomponents;
-
 
 import org.bioimageanalysis.extension.kernel.roi.roi2d.ROI2DArea;
 import org.bioimageanalysis.extension.kernel.roi.roi3d.ROI3DArea;
@@ -174,7 +173,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i> {
      * @param t        int
      * @return an array containing the average intensity of the component in each band
      */
-    public double[] computeMeanIntensity(final Sequence sequence, final int t) {
+    public double[] computeMeanIntensity(final @NotNull Sequence sequence, final int t) {
         final double[] intensitySum = new double[sequence.getSizeC()];
 
         for (final Point3i point : points) {
@@ -249,7 +248,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i> {
      * @param t        int
      * @return an array containing the average intensity of the component in each band
      */
-    public double[] computeMaxIntensity(final Sequence sequence, final int t) {
+    public double[] computeMaxIntensity(final @NotNull Sequence sequence, final int t) {
         final double[] maxIntensity = new double[sequence.getSizeC()];
 
         for (final Point3i point : points) {
@@ -529,7 +528,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i> {
      * @return true if this component intersects (e.g. has at least one voxel overlapping with) the
      * specified component
      */
-    public boolean intersects(final ConnectedComponent component) {
+    public boolean intersects(final @NotNull ConnectedComponent component) {
         final int thisSize = getSize();
         final int componentSize = component.getSize();
 

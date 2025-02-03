@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -40,6 +40,8 @@ import org.bioimageanalysis.icy.model.sequence.SequenceDataIterator;
 import org.bioimageanalysis.icy.model.sequence.VolumetricImage;
 import org.bioimageanalysis.icy.model.swimmingPool.SwimmingObject;
 import org.bioimageanalysis.icy.system.IcyHandledException;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import plugins.adufour.blocks.lang.Block;
 import plugins.adufour.blocks.util.VarList;
 import plugins.adufour.ezplug.*;
@@ -58,7 +60,7 @@ import java.io.IOException;
 import java.util.*;
 
 @IcyPluginName("Connected Components")
-@IcyPluginIcon(path = "/icon/Connected_Components.png")
+@IcyPluginIcon(path = "/plugins/adufour/connectedcomponents/Connected_Components.png")
 public class ConnectedComponents extends EzPlug implements Block {
     /**
      * List of extraction methods suitable for the Connected Components plugin
@@ -517,6 +519,7 @@ public class ConnectedComponents extends EzPlug implements Block {
          * @param value the pixel value
          * @param label the label value
          */
+        @Contract(pure = true)
         Label(final double value, final int label) {
             this.imageValue = value;
             this.targetLabelValue = label;
@@ -525,6 +528,7 @@ public class ConnectedComponents extends EzPlug implements Block {
         /**
          * Retrieves the final object label (recursively)
          */
+        @Contract(pure = true)
         int getFinalLabelValue() {
             return targetLabel == null ? targetLabelValue : targetLabel.getFinalLabelValue();
         }
@@ -542,7 +546,11 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ExtractionType
      * @see ConnectedComponent
      */
-    public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(final Sequence inputSequence, final Sequence labeledSequence) {
+    @Contract("null, _ -> fail")
+    public static @NotNull Map<Integer, List<ConnectedComponent>> extractConnectedComponents(
+            final Sequence inputSequence,
+            final Sequence labeledSequence
+    ) {
         return extractConnectedComponents(inputSequence, false, 0, Integer.MAX_VALUE, labeledSequence);
     }
 
@@ -560,7 +568,13 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ExtractionType
      * @see ConnectedComponent
      */
-    public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(final Sequence inputSequence, final int minSize, final int maxSize, final Sequence labeledSequence) {
+    @Contract("null, _, _, _ -> fail")
+    public static @NotNull Map<Integer, List<ConnectedComponent>> extractConnectedComponents(
+            final Sequence inputSequence,
+            final int minSize,
+            final int maxSize,
+            final Sequence labeledSequence
+    ) {
         return extractConnectedComponents(inputSequence, false, minSize, maxSize, labeledSequence);
     }
 
@@ -579,10 +593,22 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ExtractionType
      * @see ConnectedComponent
      */
-    public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(final Sequence inputSequence, final boolean isInputLabeled, final int minSize, final int maxSize, final Sequence labeledSequence) {
-        return extractConnectedComponents(inputSequence, 0,
-                isInputLabeled ? ExtractionType.BACKGROUND_LABELED : ExtractionType.BACKGROUND, minSize, maxSize,
-                labeledSequence);
+    @Contract("null, _, _, _, _ -> fail")
+    public static @NotNull Map<Integer, List<ConnectedComponent>> extractConnectedComponents(
+            final Sequence inputSequence,
+            final boolean isInputLabeled,
+            final int minSize,
+            final int maxSize,
+            final Sequence labeledSequence
+    ) {
+        return extractConnectedComponents(
+                inputSequence,
+                0,
+                isInputLabeled ? ExtractionType.BACKGROUND_LABELED : ExtractionType.BACKGROUND,
+                minSize,
+                maxSize,
+                labeledSequence
+        );
     }
 
     /**
@@ -601,8 +627,26 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ExtractionType
      * @see ConnectedComponent
      */
-    public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(final Sequence inputSequence, final double value, final ExtractionType type, final int minSize, final int maxSize, final Sequence labeledSequence) {
-        return extractConnectedComponents(inputSequence, value, type, false, false, false, minSize, maxSize, labeledSequence);
+    @Contract("null, _, _, _, _, _ -> fail")
+    public static @NotNull Map<Integer, List<ConnectedComponent>> extractConnectedComponents(
+            final Sequence inputSequence,
+            final double value,
+            final ExtractionType type,
+            final int minSize,
+            final int maxSize,
+            final Sequence labeledSequence
+    ) {
+        return extractConnectedComponents(
+                inputSequence,
+                value,
+                type,
+                false,
+                false,
+                false,
+                minSize,
+                maxSize,
+                labeledSequence
+        );
     }
 
     /**
@@ -627,8 +671,17 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ExtractionType
      * @see ConnectedComponent
      */
-    public static Map<Integer, List<ConnectedComponent>> extractConnectedComponents(
-            final Sequence inputSequence, final double value, final ExtractionType type, final boolean noEdgeX, final boolean noEdgeY, final boolean noEdgeZ, final int minSize, final int maxSize, Sequence labeledSequence
+    @Contract("null, _, _, _, _, _, _, _, _ -> fail")
+    public static @NotNull Map<Integer, List<ConnectedComponent>> extractConnectedComponents(
+            final Sequence inputSequence,
+            final double value,
+            final ExtractionType type,
+            final boolean noEdgeX,
+            final boolean noEdgeY,
+            final boolean noEdgeZ,
+            final int minSize,
+            final int maxSize,
+            Sequence labeledSequence
     ) {
         if (inputSequence == null || inputSequence.getSizeT() == 0)
             throw new IllegalArgumentException("Cannot extract connected components from an empty sequence !");
@@ -688,10 +741,28 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ExtractionType
      * @see ConnectedComponent
      */
-    public static List<ConnectedComponent> extractConnectedComponents(
-            final VolumetricImage stack, final double value, final ExtractionType type, final boolean noEdgeX, final boolean noEdgeY, final boolean noEdgeZ, final int minSize, final int maxSize
+    @Contract("_, _, _, _, _, _, _, _ -> new")
+    public static @NotNull List<ConnectedComponent> extractConnectedComponents(
+            final VolumetricImage stack,
+            final double value,
+            final ExtractionType type,
+            final boolean noEdgeX,
+            final boolean noEdgeY,
+            final boolean noEdgeZ,
+            final int minSize,
+            final int maxSize
     ) {
-        return extractConnectedComponents(stack, value, type, noEdgeX, noEdgeY, noEdgeZ, minSize, maxSize, new VolumetricImage());
+        return extractConnectedComponents(
+                stack,
+                value,
+                type,
+                noEdgeX,
+                noEdgeY,
+                noEdgeZ,
+                minSize,
+                maxSize,
+                new VolumetricImage()
+        );
     }
 
     /**
@@ -719,8 +790,17 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @see ExtractionType
      * @see ConnectedComponent
      */
-    public static List<ConnectedComponent> extractConnectedComponents(
-            final VolumetricImage stack, final double value, final ExtractionType type, final boolean noEdgeX, final boolean noEdgeY, final boolean noEdgeZ, final int minSize, final int maxSize, final VolumetricImage labeledStack
+    @Contract("_, _, _, _, _, _, _, _, _ -> new")
+    public static @NotNull List<ConnectedComponent> extractConnectedComponents(
+            final @NotNull VolumetricImage stack,
+            final double value,
+            final ExtractionType type,
+            final boolean noEdgeX,
+            final boolean noEdgeY,
+            final boolean noEdgeZ,
+            final int minSize,
+            final int maxSize,
+            final VolumetricImage labeledStack
     ) throws NullPointerException {
         final int width = stack.getFirstImage().getSizeX();
         final int height = stack.getFirstImage().getSizeY();
@@ -1181,8 +1261,10 @@ public class ConnectedComponents extends EzPlug implements Block {
         return new ArrayList<>(componentsMap.values());
     }
 
-    public static DetectionResult convertToDetectionResult(final Map<Integer, List<ConnectedComponent>> detections, final Sequence sequence) {
-
+    public static @NotNull DetectionResult convertToDetectionResult(
+            final @NotNull Map<Integer, List<ConnectedComponent>> detections,
+            final Sequence sequence
+    ) {
         final DetectionResult detectionResult = new DetectionResult();
         for (final Integer t : detections.keySet())
             for (final ConnectedComponent cc : detections.get(t)) {
@@ -1204,7 +1286,11 @@ public class ConnectedComponents extends EzPlug implements Block {
      * @param components Map of List of ConnectedComponent
      * @param comparator Comparator of ConnectedComponents
      */
-    public static void createLabeledSequence(final Sequence output, final Map<Integer, List<ConnectedComponent>> components, final Comparator<ConnectedComponent> comparator) {
+    public static void createLabeledSequence(
+            final Sequence output,
+            final Map<Integer, List<ConnectedComponent>> components,
+            final Comparator<ConnectedComponent> comparator
+    ) {
         if (comparator == null)
             return;
 

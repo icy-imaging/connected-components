@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -22,9 +22,12 @@ import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
 import org.bioimageanalysis.icy.common.type.DataType;
 import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
-import org.bioimageanalysis.icy.extension.plugin.interface_.PluginBundled;
+import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginIcon;
+import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginName;
 import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import plugins.adufour.blocks.lang.Block;
 import plugins.adufour.blocks.util.VarList;
 import plugins.adufour.quickhull.QuickHull2D;
@@ -38,7 +41,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ConnectedComponentDescriptor extends Plugin implements PluginBundled, Block {
+@IcyPluginName("Connected Components Block")
+@IcyPluginIcon(path = "/plugins/adufour/connectedcomponents/Connected_Components.png")
+public class ConnectedComponentDescriptor extends Plugin implements Block {
     Var<ConnectedComponent> varCC = new Var<>("Connected component", ConnectedComponent.class);
 
     VarDouble perimeter = new VarDouble("perimeter", 0.0);
@@ -54,17 +59,12 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
     VarDouble shortAxisZ = new VarDouble("short diameter (Z)", 0.0);
 
     @Override
-    public String getMainPluginClassName() {
-        return ConnectedComponents.class.getName();
-    }
-
-    @Override
-    public void declareInput(final VarList inputMap) {
+    public void declareInput(final @NotNull VarList inputMap) {
         inputMap.add("component", varCC);
     }
 
     @Override
-    public void declareOutput(final VarList outputMap) {
+    public void declareOutput(final @NotNull VarList outputMap) {
         outputMap.add("perimeter", perimeter);
         outputMap.add("long diameter", longAxis);
         outputMap.add("short diameter", shortAxis);
@@ -168,7 +168,11 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * @param bsCenter the computed center of the bounding sphere
      * @param bsRadius the computed radius of the bounding sphere
      */
-    public void computeBoundingSphere(final ConnectedComponent cc, final Point3d bsCenter, final VarDouble bsRadius) {
+    public void computeBoundingSphere(
+            final @NotNull ConnectedComponent cc,
+            final @NotNull Point3d bsCenter,
+            final @NotNull VarDouble bsRadius
+    ) {
         bsCenter.set(cc.getMassCenter());
         bsRadius.setValue(cc.getMaxDistanceTo(bsCenter));
     }
@@ -181,7 +185,11 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      *                       extracted contour
      * @return The 3D perimeter (or 3D surface) of this component
      */
-    public double computePerimeter(final ConnectedComponent cc, final ArrayList<Point3i> contourPoints, final Sequence outputSequence) {
+    public double computePerimeter(
+            final ConnectedComponent cc,
+            final ArrayList<Point3i> contourPoints,
+            final Sequence outputSequence
+    ) {
         double perimeter = 0;
 
         if (contourPoints != null)
@@ -368,7 +376,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * object. The 2 values are returned together because their computation is simultaneous
      * (in the 3D case only)
      */
-    public double[] computeConvexAreaAndVolume(final ConnectedComponent cc) {
+    public double[] computeConvexAreaAndVolume(final @NotNull ConnectedComponent cc) {
         int i = 0;
         final int n = cc.getSize();
         if (n == 1)
@@ -447,7 +455,7 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * @param r  the moment order along Z (set to 0 if the object is 2D)
      * @return the geometric moment
      */
-    public double computeGeometricMoment(final ConnectedComponent cc, final int p, final int q, final int r) {
+    public double computeGeometricMoment(final @NotNull ConnectedComponent cc, final int p, final int q, final int r) {
         double moment = 0;
 
         final Point3d center = cc.getMassCenter();
@@ -478,8 +486,13 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      * @throws IllegalArgumentException if the number of points in the component is too low (minimum is 9)
      * @throws SingularMatrixException  if the component is flat (i.e., lies in a 2D plane)
      */
-    public void computeEllipse(final ConnectedComponent cc, final Point3d center, final Point3d radii, final Vector3d[] eigenVectors,
-                               final double[] equation) throws IllegalArgumentException {
+    public void computeEllipse(
+            final @NotNull ConnectedComponent cc,
+            final Point3d center,
+            final Point3d radii,
+            final Vector3d[] eigenVectors,
+            final double[] equation
+    ) throws IllegalArgumentException {
         final int nPoints = cc.getSize();
         if (nPoints < 9) {
             throw new IllegalArgumentException("Too few points; need at least 9 to calculate a unique ellipsoid");
@@ -560,8 +573,13 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
      *                 vector <b>A</b> represented in the array is normed, so that ||<b>A</b>||=1.
      * @throws RuntimeException if the ellipse calculation fails (e.g., if a singular matrix is detected)
      */
-    public void computeEllipse(final ConnectedComponent cc, final Point2d center, final Point2d radii, final VarDouble angle, final double[] equation)
-            throws RuntimeException {
+    public void computeEllipse(
+            final @NotNull ConnectedComponent cc,
+            final Point2d center,
+            final Point2d radii,
+            final VarDouble angle,
+            final double[] equation
+    ) throws RuntimeException {
         final Point3i[] points = cc.getPoints();
         final Point3d ccenter = cc.getMassCenter();
 
@@ -595,8 +613,11 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
         final Matrix M = S1.plus(S2.times(T));
 
         final double[][] m = M.getArray();
-        final double[][] n = {{m[2][0] / 2, m[2][1] / 2, m[2][2] / 2}, {-m[1][0], -m[1][1], -m[1][2]},
-                {m[0][0] / 2, m[0][1] / 2, m[0][2] / 2}};
+        final double[][] n = {
+                {m[2][0] / 2, m[2][1] / 2, m[2][2] / 2},
+                {-m[1][0], -m[1][1], -m[1][2]},
+                {m[0][0] / 2, m[0][1] / 2, m[0][2] / 2}
+        };
 
         final Matrix N = new Matrix(n);
 
@@ -692,7 +713,8 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
         return minBB.z == maxBB.z;
     }
 
-    private Matrix diag(final Matrix matrix) {
+    @Contract("_ -> new")
+    private @NotNull Matrix diag(final @NotNull Matrix matrix) {
         final int min = Math.min(matrix.getRowDimension(), matrix.getColumnDimension());
         final double[][] diag = new double[min][1];
         for (int i = 0; i < min; i++) {
@@ -701,7 +723,8 @@ public class ConnectedComponentDescriptor extends Plugin implements PluginBundle
         return new Matrix(diag);
     }
 
-    private Matrix ones(final int m, final int n) {
+    @Contract("_, _ -> new")
+    private @NotNull Matrix ones(final int m, final int n) {
         final double[][] array = new double[m][n];
         for (final double[] row : array)
             Arrays.fill(row, 1.0);
