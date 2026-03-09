@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -27,7 +27,6 @@ import org.bioimageanalysis.icy.common.collection.array.Array1DUtil;
 import org.bioimageanalysis.icy.common.string.StringUtil;
 import org.bioimageanalysis.icy.common.type.DataIteratorUtil;
 import org.bioimageanalysis.icy.common.type.DataType;
-import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginIcon;
 import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginName;
 import org.bioimageanalysis.icy.gui.frame.progress.FailedAnnounceFrame;
 import org.bioimageanalysis.icy.io.FileUtil;
@@ -60,7 +59,6 @@ import java.io.IOException;
 import java.util.*;
 
 @IcyPluginName("Connected Components")
-@IcyPluginIcon(path = "/plugins/adufour/connectedcomponents/Connected_Components.png")
 public class ConnectedComponents extends EzPlug implements Block {
     /**
      * List of extraction methods suitable for the Connected Components plugin

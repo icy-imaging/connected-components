@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2025. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -22,7 +22,6 @@ import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
 import org.bioimageanalysis.icy.common.type.DataType;
 import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
-import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginIcon;
 import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginName;
 import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
@@ -42,7 +41,6 @@ import java.util.Arrays;
 import java.util.List;
 
 @IcyPluginName("Connected Components Block")
-@IcyPluginIcon(path = "/plugins/adufour/connectedcomponents/Connected_Components.png")
 public class ConnectedComponentDescriptor extends Plugin implements Block {
     Var<ConnectedComponent> varCC = new Var<>("Connected component", ConnectedComponent.class);
 
@@ -397,7 +395,7 @@ public class ConnectedComponentDescriptor extends Plugin implements Block {
             // volume = sum( sqrt[ (x[i] - x[i-1])^2 + (y[i] - y[i-1])^2 ] )
             // area = 0.5 * sum( (x[i-1] * y[i]) - (y[i-1] * x[i]) )
 
-            Point2D p1 = points.getLast(), p2;
+            Point2D p1 = points.get(points.size() - 1), p2;
 
             for (i = 0; i < points.size(); i++) {
                 p2 = points.get(i);
