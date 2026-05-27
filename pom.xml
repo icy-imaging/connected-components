@@ -5,13 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.bioimageanalysis.icy</groupId>
+        <groupId>fr.icy</groupId>
         <artifactId>pom-icy</artifactId>
-        <version>3.0.0-a.5</version>
+        <version>3.0.0-a.7</version>
     </parent>
 
+    <groupId>fr.icy.extensions</groupId>
     <artifactId>connected-components</artifactId>
-    <version>5.0.0-a.5</version>
+    <version>5.0.0-a.7</version>
 
     <name>ConnectedComponents</name>
     <description>
@@ -85,20 +86,24 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
+            <groupId>fr.icy.extensions</groupId>
             <artifactId>ezplug</artifactId>
+            <version>${fr.icy.extensions.ezplug.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
+            <groupId>fr.icy.extensions</groupId>
             <artifactId>protocols</artifactId>
+            <version>${fr.icy.extensions.protocols.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
+            <groupId>fr.icy.extensions</groupId>
             <artifactId>spot-detection-utilities</artifactId>
+            <version>2.0.0-a.7</version>
         </dependency>
         <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
+            <groupId>fr.icy.extensions</groupId>
             <artifactId>quickhull</artifactId>
+            <version>2.0.0-a.7</version>
         </dependency>
 
         <dependency>

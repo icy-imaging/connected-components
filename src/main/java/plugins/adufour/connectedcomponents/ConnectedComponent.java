@@ -18,15 +18,15 @@
 
 package plugins.adufour.connectedcomponents;
 
-import org.bioimageanalysis.extension.kernel.roi.roi2d.ROI2DArea;
-import org.bioimageanalysis.extension.kernel.roi.roi3d.ROI3DArea;
-import org.bioimageanalysis.icy.common.collection.array.Array1DUtil;
-import org.bioimageanalysis.icy.common.type.DataIteratorUtil;
-import org.bioimageanalysis.icy.common.type.DataType;
-import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
-import org.bioimageanalysis.icy.model.roi.ROI;
-import org.bioimageanalysis.icy.model.sequence.Sequence;
-import org.bioimageanalysis.icy.model.sequence.SequenceDataIterator;
+import fr.icy.extension.kernel.roi.roi2d.ROI2DArea;
+import fr.icy.extension.kernel.roi.roi3d.ROI3DArea;
+import fr.icy.common.collection.array.Array1DUtil;
+import fr.icy.common.type.DataIteratorUtil;
+import fr.icy.common.type.DataType;
+import fr.icy.model.image.IcyBufferedImage;
+import fr.icy.model.roi.ROI;
+import fr.icy.model.sequence.Sequence;
+import fr.icy.model.sequence.SequenceDataIterator;
 import org.jetbrains.annotations.NotNull;
 import plugins.nchenouard.spot.Detection;
 

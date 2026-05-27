@@ -20,11 +20,11 @@ package plugins.adufour.connectedcomponents;
 
 import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
-import org.bioimageanalysis.icy.common.type.DataType;
-import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
-import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginName;
-import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
-import org.bioimageanalysis.icy.model.sequence.Sequence;
+import fr.icy.common.type.DataType;
+import fr.icy.extension.plugin.abstract_.Plugin;
+import fr.icy.extension.plugin.annotation_.IcyPluginName;
+import fr.icy.model.image.IcyBufferedImage;
+import fr.icy.model.sequence.Sequence;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import plugins.adufour.blocks.lang.Block;
