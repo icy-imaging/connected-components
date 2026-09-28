@@ -18,11 +18,11 @@
 
 package plugins.adufour.connectedcomponents;
 
-import fr.icy.extension.kernel.roi.roi2d.ROI2DArea;
-import fr.icy.extension.kernel.roi.roi3d.ROI3DArea;
 import fr.icy.common.collection.array.Array1DUtil;
 import fr.icy.common.type.DataIteratorUtil;
 import fr.icy.common.type.DataType;
+import fr.icy.extension.kernel.roi.roi2d.ROI2DArea;
+import fr.icy.extension.kernel.roi.roi3d.ROI3DArea;
 import fr.icy.model.image.IcyBufferedImage;
 import fr.icy.model.roi.ROI;
 import fr.icy.model.sequence.Sequence;
@@ -182,8 +182,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i> {
             final Object dataCXY = sequence.getDataXYC(t, point.z);
 
             for (int c = 0; c < intensitySum.length; c++)
-                intensitySum[c] += Array1DUtil.getValue(((Object[]) dataCXY)[c], offsetXY,
-                        sequence.getDataType().isSigned());
+                intensitySum[c] += Array1DUtil.getValueAsDouble(((Object[]) dataCXY)[c], offsetXY, sequence.getDataType().isSigned());
         }
 
         for (int i = 0; i < intensitySum.length; i++)
@@ -220,8 +219,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i> {
             final Object dataCXY = sequence.getImage(t, point.z).getDataXYC();
 
             for (int c = 0; c < minIntensity.length; c++) {
-                final double val = Array1DUtil.getValue(((Object[]) dataCXY)[c], offsetXY,
-                        sequence.getDataType().isSigned());
+                final double val = Array1DUtil.getValueAsDouble(((Object[]) dataCXY)[c], offsetXY, sequence.getDataType().isSigned());
                 if (val < minIntensity[c])
                     minIntensity[c] = val;
             }
@@ -257,8 +255,7 @@ public class ConnectedComponent extends Detection implements Iterable<Point3i> {
             final Object dataCXY = sequence.getImage(t, point.z).getDataXYC();
 
             for (int c = 0; c < maxIntensity.length; c++) {
-                final double val = Array1DUtil.getValue(((Object[]) dataCXY)[c], offsetXY,
-                        sequence.getDataType().isSigned());
+                final double val = Array1DUtil.getValueAsDouble(((Object[]) dataCXY)[c], offsetXY, sequence.getDataType().isSigned());
                 if (val > maxIntensity[c])
                     maxIntensity[c] = val;
             }

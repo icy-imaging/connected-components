@@ -7,20 +7,16 @@
     <parent>
         <groupId>fr.icy</groupId>
         <artifactId>pom-icy</artifactId>
-        <version>3.0.0-a.7</version>
+        <version>3.0.0-a.8-SNAPSHOT</version>
     </parent>
 
-    <groupId>fr.icy.extensions</groupId>
+    <groupId>fr.icy.extension</groupId>
     <artifactId>connected-components</artifactId>
-    <version>5.0.0-a.7</version>
+    <version>5.0.0-a.8-SNAPSHOT</version>
 
-    <name>ConnectedComponents</name>
-    <description>
-        This plugin extracts groups of connected pixels in 2D and 3D based on their intensity and that of the background.
-        Works on both binary and gray-scale data.
-        Output can be pushed to the swimming pool for other plug-ins to further exploit the extracted objects.
-    </description>
-    <url>https://icy.bioimageanalysis.org/</url>
+    <name>Connected Components</name>
+    <description>Allows extracting groups of connected pixels in 2D and 3D based on their intensity and that of the background</description>
+    <url>http://icy.fr/</url>
     <inceptionYear>2011</inceptionYear>
 
     <scm>
@@ -63,12 +59,13 @@
     <contributors>
         <contributor>
             <name>Alexandre Dufour</name>
-            <roles>
-                <role>founder</role>
-            </roles>
         </contributor>
         <contributor>
             <name>Stéphane Dallongeville</name>
+        </contributor>
+        <contributor>
+            <name>Thomas Musset</name>
+            <properties><id>Azargas</id></properties>
         </contributor>
     </contributors>
 
@@ -86,24 +83,24 @@
 
     <dependencies>
         <dependency>
-            <groupId>fr.icy.extensions</groupId>
+            <groupId>fr.icy.extension</groupId>
             <artifactId>ezplug</artifactId>
-            <version>${fr.icy.extensions.ezplug.version}</version>
+            <version>${fr.icy.extension.ezplug.version}</version>
         </dependency>
         <dependency>
-            <groupId>fr.icy.extensions</groupId>
+            <groupId>fr.icy.extension</groupId>
             <artifactId>protocols</artifactId>
-            <version>${fr.icy.extensions.protocols.version}</version>
+            <version>${fr.icy.extension.protocols.version}</version>
         </dependency>
         <dependency>
-            <groupId>fr.icy.extensions</groupId>
+            <groupId>fr.icy.extension</groupId>
             <artifactId>spot-detection-utilities</artifactId>
-            <version>2.0.0-a.7</version>
+            <version>${fr.icy.extension.spot-detection-utilities.version}</version>
         </dependency>
         <dependency>
-            <groupId>fr.icy.extensions</groupId>
+            <groupId>fr.icy.extension</groupId>
             <artifactId>quickhull</artifactId>
-            <version>2.0.0-a.7</version>
+            <version>${fr.icy.extension.quickhull.version}</version>
         </dependency>
 
         <dependency>

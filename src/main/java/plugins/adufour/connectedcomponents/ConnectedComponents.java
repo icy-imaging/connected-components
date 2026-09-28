@@ -839,7 +839,7 @@ public class ConnectedComponents extends EzPlug implements Block {
                 for (int x = 0; x < width; x++, voxelOffset++) {
                     onEdgeX = (x == 0 || x == width - 1);
 
-                    final double pixelValue = Array1DUtil.getValue(inputData, voxelOffset, dataType);
+                    final double pixelValue = Array1DUtil.getValueAsDouble(inputData, voxelOffset, dataType);
 
                     final boolean pixelEqualsUserValue = (pixelValue == value);
 

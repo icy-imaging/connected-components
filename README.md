@@ -1,4 +1,4 @@
-![Version 5.0.0 alpha 7](https://img.shields.io/badge/v5.0.0-alpha_7-royalblue)
+![Version 5.0.0 alpha 8](https://img.shields.io/badge/v5.0.0-alpha_8-royalblue)
 ![Java 17+](https://img.shields.io/badge/OpenJDK-17+-5382A1?labelColor=E76F00)
 [![License: LGPL v3](https://img.shields.io/badge/LGPLv3-008033?logo=GPLv3&logoSize=auto)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Twitter](https://img.shields.io/twitter/follow/Icy_BioImaging)](https://x.com/Icy_BioImaging)
@@ -11,10 +11,11 @@ Icy is developed and maintained by [Biological Image Analysis unit at Institut P
 
 ## Extension description
 
-This extension extracts groups of connected pixels in 2D and 3D based on their intensity and that of the background. Works on both binary and gray-scale data.
-Output can be pushed to the swimming pool for other plug-ins to further exploit the extracted objects.
+This extension extracts groups of connected pixels in 2D and 3D based on their intensity and that of the background.
 
-More detailed user documentation can be found on the Connected Components documentation page on the Icy website: https://icy.bioimageanalysis.org/plugins/connected-components/
+Works on both binary and gray-scale data.
+
+Output can be pushed to the swimming pool for other plug-ins to further exploit the extracted objects.
 
 ## Installation instructions
 
@@ -39,9 +40,9 @@ More detailed user documentation can be found on the Connected Components docume
 Add this dependency block in your `pom.xml`
 ```xml
 <dependency>
-    <groupId>fr.icy.extensions</groupId>
+    <groupId>fr.icy.extension</groupId>
     <artifactId>connected-components</artifactId>
-    <version>${fr.icy.Extensions.connected-components.version}</version>
+    <version>${fr.icy.extension.connected-components.version}</version>
 </dependency>
 ```
 
